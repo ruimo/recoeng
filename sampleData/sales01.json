@@ -1,0 +1,17 @@
+{
+  "header": {
+      "sequenceNumber": "12345"
+  },
+  "mode": "0",
+  "dateTime": "2014-02-03 23:10:03",
+  "userCode": "1",
+  "itemList": [
+    {
+      "storeCode": "0142",
+      "itemCode": "1401571029",
+      "quantity": 3
+    }
+  ]
+}
+
+    

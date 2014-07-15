@@ -2,7 +2,8 @@ package models.jsonrequest
 
 case class JsonRequestHeader(
   sequenceNumber: String
-)
+) {
+}
   
 case class SalesItem(
   storeCode: String,
@@ -17,3 +18,7 @@ case class OnSalesJsonRequest(
   userCode: String,
   itemList: Seq[SalesItem]
 )
+
+object JsonRequest {
+  val SequenceNumberValidator = Validator.createValidator("sequenceNumber", "\\d{1-16}")
+}

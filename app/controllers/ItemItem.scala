@@ -22,7 +22,7 @@ object ItemItem extends Controller {
     (JsPath \ "dateTime").read[String] and
     (JsPath \ "userCode").read[String] and
     (JsPath \ "itemList").read[Seq[SalesItem]]
-  )(OnSalesJsonRequest(_, _, _, _, _))
+  )(OnSalesJsonRequest.apply _)
 
   def onSales = Action(BodyParsers.parse.json) { request =>
     val req = request.body.validate[OnSalesJsonRequest]
