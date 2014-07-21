@@ -44,6 +44,11 @@ class ItemItemNormalSpec extends Specification {
       "storeCode": "2",
       "itemCode": "20412",
       "quantity": 1
+    },
+    {
+      "storeCode": "4",
+      "itemCode": "20412",
+      "quantity": 4
     }
   ]
 }
