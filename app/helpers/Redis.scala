@@ -1,19 +1,26 @@
 package helpers
 
-import com.redis.RedisClient
-import com.redis.RedisCommand
+import scredis.PipelineClient
+import scala.concurrent.Future
+import scala.util.Try
+import play.api.Play.current
 
 object Redis {
   val SalesDb = 0
+  val DbOffsetForTest = 8
 
-  def config = play.api.Play.maybeApplication.map(_.configuration).get
-  def redisHost = config.getString("redis.host").get
-  def redisPort = config.getInt("redis.port").get
-  def redisDbBase = config.getInt("redis.db.base").getOrElse(0)
+  lazy val redisDbBase = play.api.Play.current.configuration.getInt("redis.db.base").getOrElse(0)
+
+  val redis = scredis.Redis()
+
+  def call[T](f: scredis.Redis => Future[T]): Future[T] = f(redis)
   
-  def withRedis[T](dbNo: Int = 0)(f: RedisClient => T): T =
-    f(new RedisClient(redisHost, redisPort, dbNo))
-
-  def withRedisPipeline(dbNo: Int = 0)(f: RedisClient#PipelineClient => Any): Option[List[Any]] =
-    (new RedisClient(redisHost, redisPort, dbNo)).pipeline(f)
+  def pipelined(dbNo: Int = SalesDb)(f: PipelineClient => Any): Future[IndexedSeq[Try[Any]]] = { 
+    val dbno = dbNo + redisDbBase
+    
+    redis.pipelined { pipe =>
+      pipe.select(dbno)
+      f(pipe)
+    }
+  }
 }

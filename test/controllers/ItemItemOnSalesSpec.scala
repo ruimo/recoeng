@@ -7,50 +7,162 @@ import models.jsonrequest.OnSalesJsonRequest
 import models.jsonrequest.JsonRequestHeader
 import org.joda.time.format.DateTimeFormat
 import models.jsonrequest.SalesItem
-
-
+import play.api.test._
+import play.api.test.Helpers._
+import play.api.libs.json.Json
+import play.api.libs.ws.WS
+import scala.concurrent.Await
+import helpers.Redis
+import scala.concurrent.duration._
+import play.api.libs.json.JsString
+import scala.concurrent.Future
+import scredis.util.LinkedHashSet
 
 @RunWith(classOf[JUnitRunner])
 class ItemItemOnSalesSpec extends Specification {
   "ItemItem controller" should {
-    "create valid redis request" in {
-      var result: List[(String, (String, String))] = List()
-      val req = OnSalesJsonRequest(
-        JsonRequestHeader(
-          DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").parseDateTime("2014-12-30 20:12:23"),
-          "1"
-        ),
-        "0001",
-        DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").parseDateTime("2014-12-30 20:12:50"),
-        "2",
-        List(
-          SalesItem("0001", "165201", 3),
-          SalesItem("0002", "512361", 1),
-          SalesItem("0001", "810430", 2)
-        )
+    val appWithMemoryDatabase = FakeApplication(
+      additionalConfiguration = inMemoryDatabase("default") + ("redis.db.base" -> Redis.DbOffsetForTest)
+    )
+    
+    "create valid redis request" in new WithServer(appWithMemoryDatabase, port = 3333) {
+      sync(
+        Redis.pipelined(Redis.SalesDb) { pipe =>
+          pipe.flushDb()
+        }
+      )
+      
+      val request = Json.parse(
+        """
+{
+  "header": {
+    "dateTime": "20141002112233",
+    "sequenceNumber": "12345"
+  },
+  "mode": "0001",
+  "dateTime": "20141002112233",
+  "userCode": "1",
+  "itemList": [
+    {
+      "storeCode": "0001",
+      "itemCode": "1491",
+      "quantity": 3
+    },
+    {
+      "storeCode": "0002",
+      "itemCode": "5810",
+      "quantity": 1
+    },
+    {
+      "storeCode": "0001",
+      "itemCode": "5819",
+      "quantity": 4
+    }
+  ]
+}
+        """
       )
 
-      ItemItem.handleOnSales(
-        req,
-        storeDb = (zsetKey, key) => {result = (zsetKey, key)::result}
+      val response = sync(
+        WS.url("http://localhost:3333" + controllers.routes.ItemItem.onSales())
+          .withHeaders("Content-Type" -> "application/json; charset=utf-8")
+          .post(request)
       )
-      result = result.reverse
 
-      result.size === 6
-      result.head === ("201412", ("0001:165201", "0002:512361"))
-      result = result.tail
-      result.head === ("201412", ("0001:165201", "0001:810430"))
-      result = result.tail
-      result.head === ("201412", ("0002:512361", "0001:165201"))
-      result = result.tail
-      result.head === ("201412", ("0002:512361", "0001:810430"))
-      result = result.tail
-      result.head === ("201412", ("0001:810430", "0001:165201"))
-      result = result.tail
-      result.head === ("201412", ("0001:810430", "0002:512361"))
-      result.tail === Nil
+      response.status === 200
+      response.header("Content-Type").toString.indexOf("application/json") !== -1
+      val jsonResp = Json.parse(response.body)
+      jsonResp \ "sequenceNumber" === JsString("12345")
+      jsonResp \ "statusCode" === JsString("OK")
+
+      doWith(sync(
+        Redis.call { redis =>
+          redis.select(Redis.DbOffsetForTest + Redis.SalesDb)
+          redis.zRangeWithScores[String]("itemSoldDates", end = -1)
+        }
+      )) { set =>
+        set.size === 3
+        set.contains("0001:1491:20141002", 20141002)
+        set.contains("0002:5810:20141002", 20141002)
+        set.contains("0001:5819:20141002", 20141002)
+      }
+      
+      doWith(sync(
+        Redis.call { redis =>
+          redis.select(Redis.DbOffsetForTest + Redis.SalesDb)
+          redis.hGetAll[String]("itemItem:0001:1491:20141002")
+        }
+      )) { optMap =>
+        val map = optMap.get
+        map.size === 2
+        map("0002:5810") === "1"
+        map("0001:5819") === "1"
+      }
+
+      doWith(sync(
+        Redis.call { redis =>
+          redis.select(Redis.DbOffsetForTest + Redis.SalesDb)
+          redis.hGetAll("itemItem:0002:5810:20141002")
+        }
+      )) { optMap =>
+        val map = optMap.get
+          map.size === 2
+          map("0001:1491") === "1"
+          map("0001:5819") === "1"
+      }
+
+      doWith(sync(
+        Redis.call { redis =>
+          redis.select(Redis.DbOffsetForTest + Redis.SalesDb)
+          redis.hGetAll("itemItem:0001:5819:20141002")
+        }
+      )) { optMap =>
+        val map = optMap.get
+          map.size === 2
+          map("0001:1491") === "1"
+          map("0002:5810") === "1"
+      }
+
+      doWith(sync(
+        Redis.call { redis =>
+          redis.select(Redis.DbOffsetForTest + Redis.SalesDb)
+          redis.zRangeWithScores[String]("itemItemSum1m:0001:1491", end = -1)
+        }
+      )) { set =>
+        set.size === 2
+        set.contains("0002:5810", 1)
+        set.contains("0001:5819", 1)
+      }
+
+      doWith(sync(
+        Redis.call { redis =>
+          redis.select(Redis.DbOffsetForTest + Redis.SalesDb)
+          redis.zRangeWithScores[String]("itemItemSum1m:0002:5810", end = -1)
+        }
+      )) { set =>
+        set.size === 2
+        set.contains("0001:1491", 1)
+        set.contains("0001:5819", 1)
+      }
+
+      doWith(sync(
+        Redis.call { redis =>
+          redis.select(Redis.DbOffsetForTest + Redis.SalesDb)
+          redis.zRangeWithScores[String]("itemItemSum1m:0001:5819", end = -1)
+        }
+      )) { set =>
+        set.size === 2
+        set.contains("0001:1491", 1)
+        set.contains("0002:5810", 1)
+      }
     }
   }
+
+  def sync[T](future: Future[T]): T = Await.result(
+    future, Duration(5, SECONDS)
+  )
+
+  def doWith[T](arg: T)(func: T => Unit) {
+    func(arg)
+  }
 }
-
-
