@@ -17,9 +17,12 @@ import scala.concurrent.duration._
 import play.api.libs.json.JsString
 import scala.concurrent.Future
 import scredis.util.LinkedHashSet
+import scredis.parsing.IntParser
 
 @RunWith(classOf[JUnitRunner])
 class ItemItemOnSalesSpec extends Specification {
+  implicit val intParser = IntParser
+
   "ItemItem controller" should {
     val appWithMemoryDatabase = FakeApplication(
       additionalConfiguration = inMemoryDatabase("default") + ("redis.db.base" -> Redis.DbOffsetForTest)
@@ -90,37 +93,37 @@ class ItemItemOnSalesSpec extends Specification {
       doWith(sync(
         Redis.call { redis =>
           redis.select(Redis.DbOffsetForTest + Redis.SalesDb)
-          redis.hGetAll[String]("itemItem:0001:1491:20141002")
+          redis.hGetAll[Int]("itemItem:0001:1491:20141002")
         }
       )) { optMap =>
         val map = optMap.get
         map.size === 2
-        map("0002:5810") === "1"
-        map("0001:5819") === "1"
+        map("0002:5810") === 1
+        map("0001:5819") === 1
       }
 
       doWith(sync(
         Redis.call { redis =>
           redis.select(Redis.DbOffsetForTest + Redis.SalesDb)
-          redis.hGetAll("itemItem:0002:5810:20141002")
+          redis.hGetAll[Int]("itemItem:0002:5810:20141002")
         }
       )) { optMap =>
         val map = optMap.get
           map.size === 2
-          map("0001:1491") === "1"
-          map("0001:5819") === "1"
+          map("0001:1491") === 1
+          map("0001:5819") === 1
       }
 
       doWith(sync(
         Redis.call { redis =>
           redis.select(Redis.DbOffsetForTest + Redis.SalesDb)
-          redis.hGetAll("itemItem:0001:5819:20141002")
+          redis.hGetAll[Int]("itemItem:0001:5819:20141002")
         }
       )) { optMap =>
         val map = optMap.get
           map.size === 2
-          map("0001:1491") === "1"
-          map("0002:5810") === "1"
+          map("0001:1491") === 1
+          map("0002:5810") === 1
       }
 
       doWith(sync(
