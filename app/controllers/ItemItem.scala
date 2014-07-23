@@ -12,16 +12,12 @@ import play.api.data.validation.ValidationError
 import helpers.JsConstraints._
 import helpers.ErrorEntry
 import helpers.Redis
-import org.joda.time.format.DateTimeFormat
-import org.joda.time.format.DateTimeFormatter
 import scala.concurrent.Future
 import scala.util.Try
 
 object ItemItem extends Controller with HasLogger {
 //  def config = play.api.Play.maybeApplication.map(_.configuration).get
 //  def stubRedis = config.getBoolean("stub.redis").getOrElse(false)
-
-  val YmdKeyFormat: DateTimeFormatter = DateTimeFormat.forPattern("yyyyMMdd")
 
   implicit val jsonRequestHeaderReads: Reads[JsonRequestHeader] = (
     (JsPath \ "dateTime").read(jodaDateReads("YYYYMMddHHmmss")) and
@@ -56,8 +52,8 @@ object ItemItem extends Controller with HasLogger {
   }
 
   def handleOnSales(req: OnSalesJsonRequest): Future[Result] = {
-    val keySet = req.itemList.map(it => it.storeCode + ":" + it.itemCode).toSet
-    val tranDate = YmdKeyFormat.print(req.dateTime).toInt
+    val keySet = req.itemList.map(_.redisCode).toSet
+    val tranDate = req.tranDateInYyyyMmDd
     val res: Future[IndexedSeq[Try[Any]]] = Redis.pipelined(Redis.SalesDb) { pipe =>
       keySet.foreach { key => pipe.zAdd("itemSoldDates", (key + ":" + tranDate, tranDate)) }
       for (key1 <- keySet; key2 <- keySet if key1 != key2) {
