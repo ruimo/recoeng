@@ -29,13 +29,17 @@ class ItemItemOnSalesSpec extends Specification {
     )
     
     "create valid redis request" in new WithServer(appWithMemoryDatabase, port = 3333) {
-      sync(
-        Redis.pipelined(Redis.SalesDb) { pipe =>
-          pipe.flushDb()
-        }
-      )
+      Redis.sync { redis =>
+        redis.flushDb()
+      }
       
-      doWith(sync(
+      doWith(Redis.sync { redis =>
+        redis.zRangeWithScores[String]("itemSoldDates", end = -1)
+      }) { set =>
+        set.size === 0
+      }
+
+      doWith(Await.result(
         WS.url("http://localhost:3333" + controllers.routes.ItemItem.onSales())
           .withHeaders("Content-Type" -> "application/json; charset=utf-8")
           .post(Json.parse("""
@@ -65,7 +69,7 @@ class ItemItemOnSalesSpec extends Specification {
     }
   ]
 }
-        """))
+        """)), Duration(10, SECONDS)
       )) { response =>
         response.status === 200
         response.header("Content-Type").toString.indexOf("application/json") !== -1
@@ -74,88 +78,67 @@ class ItemItemOnSalesSpec extends Specification {
         jsonResp \ "statusCode" === JsString("OK")
       }
 
-      doWith(sync(
-        Redis.call { redis =>
-          redis.select(Redis.DbOffsetForTest + Redis.SalesDb)
-          redis.zRangeWithScores[String]("itemSoldDates", end = -1)
-        }
-      )) { set =>
+      doWith(Redis.sync { redis =>
+        redis.zRangeWithScores[String]("itemSoldDates", end = -1)
+      }) { set =>
         set.size === 3
         set.contains("0001:1491:20141002", 20141002)
         set.contains("0002:5810:20141002", 20141002)
         set.contains("0001:5819:20141002", 20141002)
       }
       
-      doWith(sync(
-        Redis.call { redis =>
-          redis.select(Redis.DbOffsetForTest + Redis.SalesDb)
-          redis.hGetAll[Int]("itemItem:0001:1491:20141002")
-        }
-      )) { optMap =>
+      doWith(Redis.sync { redis =>
+        redis.hGetAll[Int]("itemItem:0001:1491:20141002")
+      }) { optMap =>
         val map = optMap.get
         map.size === 2
         map("0002:5810") === 1
         map("0001:5819") === 1
       }
 
-      doWith(sync(
-        Redis.call { redis =>
-          redis.select(Redis.DbOffsetForTest + Redis.SalesDb)
-          redis.hGetAll[Int]("itemItem:0002:5810:20141002")
-        }
-      )) { optMap =>
+      doWith(Redis.sync { redis =>
+        redis.hGetAll[Int]("itemItem:0002:5810:20141002")
+      }) { optMap =>
         val map = optMap.get
           map.size === 2
           map("0001:1491") === 1
           map("0001:5819") === 1
       }
 
-      doWith(sync(
-        Redis.call { redis =>
-          redis.select(Redis.DbOffsetForTest + Redis.SalesDb)
-          redis.hGetAll[Int]("itemItem:0001:5819:20141002")
-        }
-      )) { optMap =>
+      doWith(Redis.sync { redis =>
+        redis.hGetAll[Int]("itemItem:0001:5819:20141002")
+      }) { optMap =>
         val map = optMap.get
           map.size === 2
           map("0001:1491") === 1
           map("0002:5810") === 1
       }
 
-      doWith(sync(
-        Redis.call { redis =>
-          redis.select(Redis.DbOffsetForTest + Redis.SalesDb)
-          redis.zRangeWithScores[String]("itemItemSum1m:0001:1491", end = -1)
-        }
-      )) { set =>
+      doWith(Redis.sync { redis =>
+        redis.zRangeWithScores[String]("itemItemSum1m:0001:1491", end = -1)
+      }) { set =>
         set.size === 2
         set.contains("0002:5810", 1)
         set.contains("0001:5819", 1)
       }
 
-      doWith(sync(
-        Redis.call { redis =>
-          redis.select(Redis.DbOffsetForTest + Redis.SalesDb)
-          redis.zRangeWithScores[String]("itemItemSum1m:0002:5810", end = -1)
-        }
-      )) { set =>
+      doWith(Redis.sync { redis =>
+        redis.zRangeWithScores[String]("itemItemSum1m:0002:5810", end = -1)
+      }) { set =>
         set.size === 2
         set.contains("0001:1491", 1)
         set.contains("0001:5819", 1)
       }
 
-      doWith(sync(
-        Redis.call { redis =>
-          redis.select(Redis.DbOffsetForTest + Redis.SalesDb)
-          redis.zRangeWithScores[String]("itemItemSum1m:0001:5819", end = -1)
-        }
-      )) { set =>
+      doWith(Redis.sync { redis =>
+        redis.zRangeWithScores[String]("itemItemSum1m:0001:5819", end = -1)
+      }) { set =>
         set.size === 2
         set.contains("0001:1491", 1)
         set.contains("0002:5810", 1)
       }
 
-      doWith(sync(
+      doWith(Await.result(
         WS.url("http://localhost:3333" + controllers.routes.ItemItem.onSales())
           .withHeaders("Content-Type" -> "application/json; charset=utf-8")
           .post(Json.parse("""
@@ -185,7 +168,7 @@ class ItemItemOnSalesSpec extends Specification {
     }
   ]
 }
-        """))
+        """)), Duration(10, SECONDS)
       )) { response =>
         response.status === 200
         response.header("Content-Type").toString.indexOf("application/json") !== -1
@@ -194,12 +177,9 @@ class ItemItemOnSalesSpec extends Specification {
         jsonResp \ "statusCode" === JsString("OK")
       }
 
-      doWith(sync(
-        Redis.call { redis =>
-          redis.select(Redis.DbOffsetForTest + Redis.SalesDb)
-          redis.zRangeWithScores[String]("itemSoldDates", end = -1)
-        }
-      )) { set =>
+      doWith(Redis.sync { redis =>
+        redis.zRangeWithScores[String]("itemSoldDates", end = -1)
+      }) { set =>
         set.size === 4
         set.contains("0001:1491:20141002", 20141002)
         set.contains("0002:5810:20141002", 20141002)
@@ -207,12 +187,9 @@ class ItemItemOnSalesSpec extends Specification {
         set.contains("0003:8172:20141002", 20141002)
       }
       
-      doWith(sync(
-        Redis.call { redis =>
-          redis.select(Redis.DbOffsetForTest + Redis.SalesDb)
-          redis.hGetAll[Int]("itemItem:0001:1491:20141002")
-        }
-      )) { optMap =>
+      doWith(Redis.sync { redis =>
+        redis.hGetAll[Int]("itemItem:0001:1491:20141002")
+      }) { optMap =>
         val map = optMap.get
         map.size === 3
         map("0002:5810") === 1
@@ -220,24 +197,18 @@ class ItemItemOnSalesSpec extends Specification {
         map("0003:8172") === 1
       }
 
-      doWith(sync(
-        Redis.call { redis =>
-          redis.select(Redis.DbOffsetForTest + Redis.SalesDb)
-          redis.hGetAll[Int]("itemItem:0002:5810:20141002")
-        }
-      )) { optMap =>
+      doWith(Redis.sync { redis =>
+        redis.hGetAll[Int]("itemItem:0002:5810:20141002")
+      }) { optMap =>
         val map = optMap.get
           map.size === 2
           map("0001:1491") === 1
           map("0001:5819") === 1
       }
 
-      doWith(sync(
-        Redis.call { redis =>
-          redis.select(Redis.DbOffsetForTest + Redis.SalesDb)
-          redis.hGetAll[Int]("itemItem:0001:5819:20141002")
-        }
-      )) { optMap =>
+      doWith(Redis.sync { redis =>
+        redis.hGetAll[Int]("itemItem:0001:5819:20141002")
+      }) { optMap =>
         val map = optMap.get
           map.size === 3
           map("0001:1491") === 2
@@ -245,65 +216,50 @@ class ItemItemOnSalesSpec extends Specification {
           map("0003:8172") === 1
       }
 
-      doWith(sync(
-        Redis.call { redis =>
-          redis.select(Redis.DbOffsetForTest + Redis.SalesDb)
-          redis.hGetAll[Int]("itemItem:0003:8172:20141002")
-        }
-      )) { optMap =>
+      doWith(Redis.sync { redis =>
+        redis.hGetAll[Int]("itemItem:0003:8172:20141002")
+      }) { optMap =>
         val map = optMap.get
           map.size === 2
           map("0001:1491") === 1
           map("0001:5819") === 1
       }
 
-      doWith(sync(
-        Redis.call { redis =>
-          redis.select(Redis.DbOffsetForTest + Redis.SalesDb)
-          redis.zRangeWithScores[String]("itemItemSum1m:0001:1491", end = -1)
-        }
-      )) { set =>
+      doWith(Redis.sync { redis =>
+        redis.zRangeWithScores[String]("itemItemSum1m:0001:1491", end = -1)
+      }) { set =>
         set.size === 3
         set.contains("0002:5810", 1)
         set.contains("0001:5819", 2)
         set.contains("0003:8172", 1)
       }
 
-      doWith(sync(
-        Redis.call { redis =>
-          redis.select(Redis.DbOffsetForTest + Redis.SalesDb)
-          redis.zRangeWithScores[String]("itemItemSum1m:0002:5810", end = -1)
-        }
-      )) { set =>
+      doWith(Redis.sync { redis =>
+        redis.zRangeWithScores[String]("itemItemSum1m:0002:5810", end = -1)
+      }) { set =>
         set.size === 2
         set.contains("0001:1491", 1)
         set.contains("0001:5819", 1)
       }
 
-      doWith(sync(
-        Redis.call { redis =>
-          redis.select(Redis.DbOffsetForTest + Redis.SalesDb)
-          redis.zRangeWithScores[String]("itemItemSum1m:0001:5819", end = -1)
-        }
-      )) { set =>
+      doWith(Redis.sync { redis =>
+        redis.zRangeWithScores[String]("itemItemSum1m:0001:5819", end = -1)
+      }) { set =>
         set.size === 3
         set.contains("0001:1491", 2)
         set.contains("0002:5810", 1)
         set.contains("0003:8172", 1)
       }
 
-      doWith(sync(
-        Redis.call { redis =>
-          redis.select(Redis.DbOffsetForTest + Redis.SalesDb)
-          redis.zRangeWithScores[String]("itemItemSum1m:0003:8172", end = -1)
-        }
-      )) { set =>
+      doWith(Redis.sync { redis =>
+        redis.zRangeWithScores[String]("itemItemSum1m:0003:8172", end = -1)
+      }) { set =>
         set.size === 2
         set.contains("0001:1491", 1)
         set.contains("0001:5819", 1)
       }
 
-      doWith(sync(
+      doWith(Await.result(
         WS.url("http://localhost:3333" + controllers.routes.ItemItem.onSales())
           .withHeaders("Content-Type" -> "application/json; charset=utf-8")
           .post(Json.parse("""
@@ -328,7 +284,7 @@ class ItemItemOnSalesSpec extends Specification {
     }
   ]
 }
-        """))
+        """)), Duration(10, SECONDS)
       )) { response =>
         response.status === 200
         response.header("Content-Type").toString.indexOf("application/json") !== -1
@@ -337,12 +293,9 @@ class ItemItemOnSalesSpec extends Specification {
         jsonResp \ "statusCode" === JsString("OK")
       }
 
-      doWith(sync(
-        Redis.call { redis =>
-          redis.select(Redis.DbOffsetForTest + Redis.SalesDb)
-          redis.zRangeWithScores[String]("itemSoldDates", end = -1)
-        }
-      )) { set =>
+      doWith(Redis.sync { redis =>
+        redis.zRangeWithScores[String]("itemSoldDates", end = -1)
+      }) { set =>
         set.size === 6
         set.contains("0001:1491:20141002", 20141002)
         set.contains("0002:5810:20141002", 20141002)
@@ -352,12 +305,9 @@ class ItemItemOnSalesSpec extends Specification {
         set.contains("0003:8172:20141010", 20141010)
       }
       
-      doWith(sync(
-        Redis.call { redis =>
-          redis.select(Redis.DbOffsetForTest + Redis.SalesDb)
-          redis.hGetAll[Int]("itemItem:0001:1491:20141002")
-        }
-      )) { optMap =>
+      doWith(Redis.sync { redis =>
+        redis.hGetAll[Int]("itemItem:0001:1491:20141002")
+      }) { optMap =>
         val map = optMap.get
         map.size === 3
         map("0002:5810") === 1
@@ -365,35 +315,26 @@ class ItemItemOnSalesSpec extends Specification {
         map("0003:8172") === 1
       }
 
-      doWith(sync(
-        Redis.call { redis =>
-          redis.select(Redis.DbOffsetForTest + Redis.SalesDb)
-          redis.hGetAll[Int]("itemItem:0001:1491:20141010")
-        }
-      )) { optMap =>
+      doWith(Redis.sync { redis =>
+        redis.hGetAll[Int]("itemItem:0001:1491:20141010")
+      }) { optMap =>
         val map = optMap.get
         map.size === 1
         map("0003:8172") === 1
       }
 
-      doWith(sync(
-        Redis.call { redis =>
-          redis.select(Redis.DbOffsetForTest + Redis.SalesDb)
-          redis.hGetAll[Int]("itemItem:0002:5810:20141002")
-        }
-      )) { optMap =>
+      doWith(Redis.sync { redis =>
+        redis.hGetAll[Int]("itemItem:0002:5810:20141002")
+      }) { optMap =>
         val map = optMap.get
           map.size === 2
           map("0001:1491") === 1
           map("0001:5819") === 1
       }
 
-      doWith(sync(
-        Redis.call { redis =>
-          redis.select(Redis.DbOffsetForTest + Redis.SalesDb)
-          redis.hGetAll[Int]("itemItem:0001:5819:20141002")
-        }
-      )) { optMap =>
+      doWith(Redis.sync { redis =>
+        redis.hGetAll[Int]("itemItem:0001:5819:20141002")
+      }) { optMap =>
         val map = optMap.get
           map.size === 3
           map("0001:1491") === 2
@@ -401,80 +342,119 @@ class ItemItemOnSalesSpec extends Specification {
           map("0003:8172") === 1
       }
 
-      doWith(sync(
-        Redis.call { redis =>
-          redis.select(Redis.DbOffsetForTest + Redis.SalesDb)
-          redis.hGetAll[Int]("itemItem:0003:8172:20141002")
-        }
-      )) { optMap =>
+      doWith(Redis.sync { redis =>
+        redis.hGetAll[Int]("itemItem:0003:8172:20141002")
+      }) { optMap =>
         val map = optMap.get
           map.size === 2
           map("0001:1491") === 1
           map("0001:5819") === 1
       }
 
-      doWith(sync(
-        Redis.call { redis =>
-          redis.select(Redis.DbOffsetForTest + Redis.SalesDb)
-          redis.hGetAll[Int]("itemItem:0003:8172:20141010")
-        }
-      )) { optMap =>
+      doWith(Redis.sync { redis =>
+        redis.hGetAll[Int]("itemItem:0003:8172:20141010")
+      }) { optMap =>
         val map = optMap.get
           map.size === 1
           map("0001:1491") === 1
       }
 
-      doWith(sync(
-        Redis.call { redis =>
-          redis.select(Redis.DbOffsetForTest + Redis.SalesDb)
-          redis.zRangeWithScores[String]("itemItemSum1m:0001:1491", end = -1)
-        }
-      )) { set =>
+      doWith(Redis.sync { redis =>
+        redis.zRangeWithScores[String]("itemItemSum1m:0001:1491", end = -1)
+      }) { set =>
         set.size === 3
         set.contains("0002:5810", 1)
         set.contains("0001:5819", 2)
         set.contains("0003:8172", 2)
       }
 
-      doWith(sync(
-        Redis.call { redis =>
-          redis.select(Redis.DbOffsetForTest + Redis.SalesDb)
-          redis.zRangeWithScores[String]("itemItemSum1m:0002:5810", end = -1)
-        }
-      )) { set =>
+      doWith(Redis.sync { redis =>
+        redis.zRangeWithScores[String]("itemItemSum1m:0002:5810", end = -1)
+      }) { set =>
         set.size === 2
         set.contains("0001:1491", 1)
         set.contains("0001:5819", 1)
       }
 
-      doWith(sync(
-        Redis.call { redis =>
-          redis.select(Redis.DbOffsetForTest + Redis.SalesDb)
-          redis.zRangeWithScores[String]("itemItemSum1m:0001:5819", end = -1)
-        }
-      )) { set =>
+      doWith(Redis.sync { redis =>
+        redis.zRangeWithScores[String]("itemItemSum1m:0001:5819", end = -1)
+      }) { set =>
         set.size === 3
         set.contains("0001:1491", 2)
         set.contains("0002:5810", 1)
         set.contains("0003:8172", 1)
       }
 
-      doWith(sync(
-        Redis.call { redis =>
-          redis.select(Redis.DbOffsetForTest + Redis.SalesDb)
-          redis.zRangeWithScores[String]("itemItemSum1m:0003:8172", end = -1)
-        }
-      )) { set =>
+      doWith(Redis.sync { redis =>
+        redis.zRangeWithScores[String]("itemItemSum1m:0003:8172", end = -1)
+      }) { set =>
         set.size === 2
         set.contains("0001:1491", 2)
         set.contains("0001:5819", 1)
       }
+
+      // Expire record.
+      batches.ItemItem.houseKeepItemItem(20141007)
+
+      doWith(Redis.sync { redis =>
+        redis.zRangeWithScores[String]("itemSoldDates", end = -1)
+      }) { set =>
+        set.size === 2
+        set.contains("0001:1491:20141010", 20141010)
+        set.contains("0003:8172:20141010", 20141010)
+      }
+      
+      doWith(Redis.sync { _.keys("itemItem:0001:1491:20141002") }) { _.size === 0 }
+      doWith(Redis.sync { _.keys("itemItem:0002:5810:20141002") }) { _.size === 0 }
+      doWith(Redis.sync { _.keys("itemItem:0001:5819:20141002") }) { _.size === 0 }
+      doWith(Redis.sync { _.keys("itemItem:0003:8172:20141002") }) { _.size === 0 }
+      doWith(Redis.sync { _.hGetAll[Int]("itemItem:0001:1491:20141010") }) { optMap =>
+        val map = optMap.get
+        map.size === 1
+        map("0003:8172") === 1
+      }
+
+      doWith(Redis.sync { _.hGetAll[Int]("itemItem:0003:8172:20141010") }) { optMap =>
+        val map = optMap.get
+          map.size === 1
+          map("0001:1491") === 1
+      }
+
+      doWith(Redis.sync { redis =>
+        redis.zRangeWithScores[String]("itemItemSum1m:0001:1491", end = -1)
+      }) { set =>
+        set.size === 3
+        set.contains("0002:5810", 0)
+        set.contains("0001:5819", 0)
+        set.contains("0003:8172", 1)
+      }
+
+      doWith(Redis.sync { redis =>
+        redis.zRangeWithScores[String]("itemItemSum1m:0002:5810", end = -1)
+      }) { set =>
+        set.size === 2
+        set.contains("0001:1491", 0)
+        set.contains("0001:5819", 0)
+      }
+
+      doWith(Redis.sync { redis =>
+        redis.zRangeWithScores[String]("itemItemSum1m:0001:5819", end = -1)
+      }) { set =>
+        set.size === 3
+        set.contains("0001:1491", 0)
+        set.contains("0002:5810", 0)
+        set.contains("0003:8172", 0)
+      }
+
+      doWith(Redis.sync { redis =>
+        redis.zRangeWithScores[String]("itemItemSum1m:0003:8172", end = -1)
+      }) { set =>
+        set.size === 2
+        set.contains("0001:1491", 1)
+        set.contains("0001:5819", 0)
+      }
     }
   }
-
-  def sync[T](future: Future[T]): T = Await.result(
-    future, Duration(5, SECONDS)
-  )
 
   def doWith[T](arg: T)(func: T => Unit) {
     func(arg)

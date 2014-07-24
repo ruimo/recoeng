@@ -15,15 +15,7 @@ import helpers.Redis
 import scala.concurrent.Future
 import scala.util.Try
 
-object ItemItem extends Controller with HasLogger {
-//  def config = play.api.Play.maybeApplication.map(_.configuration).get
-//  def stubRedis = config.getBoolean("stub.redis").getOrElse(false)
-
-  implicit val jsonRequestHeaderReads: Reads[JsonRequestHeader] = (
-    (JsPath \ "dateTime").read(jodaDateReads("YYYYMMddHHmmss")) and
-    (JsPath \ "sequenceNumber").read(regex("\\d{1,16}".r))
-  )(JsonRequestHeader(_, _))
-
+object ItemItem extends Controller with HasLogger with JsonRequestHandler {
   implicit val salesItemReads: Reads[SalesItem] = (
     (JsPath \ "storeCode").read(regex("\\w{1,8}".r)) and
     (JsPath \ "itemCode").read(regex("\\w{1,24}".r)) and
@@ -41,11 +33,11 @@ object ItemItem extends Controller with HasLogger {
   def onSales = Action.async(BodyParsers.parse.json) { request =>
     request.body.validate[OnSalesJsonRequest].fold(
       errors => {
-        logger.error("Json onSales request validation error: " + errors)
+        logger.error("Json ItemItem.onSales request validation error: " + errors)
         Future {BadRequest(toJson(errors))}
       },
       req => {
-        logger.info("Json onSales request: " + req)
+        logger.info("Json ItemItem.onSales request: " + req)
         handleOnSales(req)
       }
     )
@@ -81,7 +73,4 @@ object ItemItem extends Controller with HasLogger {
       }
     }
   }
-  
-  def toJson(errors: Seq[(JsPath, Seq[ValidationError])]): JsValue =
-    Json.toJson(errors.map {e => ErrorEntry(e._1, e._2)})
 }

@@ -10,6 +10,12 @@ case class JsonRequestHeader(
   sequenceNumber: String
 )
   
+case class JsonRequestPaging(
+  cursor: Int,
+  offset: Int,
+  limit: Int
+)
+
 case class SalesItem(
   storeCode: String,
   itemCode: String,
@@ -27,3 +33,11 @@ case class OnSalesJsonRequest(
 ) {
   lazy val tranDateInYyyyMmDd: Int = toYyyyMmDd(dateTime)
 }
+
+case class RecommendBySingleItemJsonRequest(
+  header: JsonRequestHeader,
+  storeCode: String,
+  itemCode: String,
+  sort: String,
+  paging: JsonRequestPaging
+)
