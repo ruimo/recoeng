@@ -40,4 +40,6 @@ case class RecommendBySingleItemJsonRequest(
   itemCode: String,
   sort: String,
   paging: JsonRequestPaging
-)
+) {
+  lazy val sortOrder: SortOrder = SortOrder(sort)
+}

@@ -38,6 +38,10 @@ object RecommendByItem extends Controller with HasLogger with JsonRequestHandler
   }
 
   def handleBySingleItem(req: RecommendBySingleItemJsonRequest): Future[Result] = {
+    val res: Future[IndexedSeq[Try[Any]]] = Redis.pipelined(Redis.SalesDb) { pipe =>
+      val key = "itemItemSum1m:" + req.storeCode + ":" + req.itemCode
+
+    }
     Future {Ok("")}
   }
 }
