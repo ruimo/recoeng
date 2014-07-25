@@ -30,10 +30,19 @@ object Redis {
     )
   }
   
-  def pipelined(dbNo: Int = SalesDb)(f: PipelineClient => Any): Future[IndexedSeq[Try[Any]]] = { 
+  def pipelined(dbNo: Int = SalesDb)(f: PipelineClient => Unit): Future[IndexedSeq[Try[Any]]] = { 
     val dbno = dbNo + redisDbBase
     
     redis.pipelined { pipe =>
+      pipe.select(dbno)
+      f(pipe)
+    }
+  }
+
+  def pipelined1[T](dbNo: Int = SalesDb)(f: PipelineClient => Future[T]): Future[T] = {
+    val dbno = dbNo + redisDbBase
+
+    redis.pipelined1 { pipe =>
       pipe.select(dbno)
       f(pipe)
     }

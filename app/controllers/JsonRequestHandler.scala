@@ -15,7 +15,6 @@ trait JsonRequestHandler {
   )(JsonRequestHeader(_, _))
 
   implicit val jsonRequestPagingReads: Reads[JsonRequestPaging] = (
-    (JsPath \ "cursor").read[Int] and
     (JsPath \ "offset").read[Int] and
     (JsPath \ "limit").read[Int]
   )(JsonRequestPaging.apply _)

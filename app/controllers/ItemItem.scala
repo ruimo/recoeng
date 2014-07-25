@@ -61,7 +61,7 @@ object ItemItem extends Controller with HasLogger with JsonRequestHandler {
     res.map { r =>
       if (r.exists(_.isFailure)) {
         val result = InternalServerError(
-            Json.obj("sequenceNumber" -> req.header.sequenceNumber, "statusCode" -> "SYS", "message" -> r.toString)
+          Json.obj("sequenceNumber" -> req.header.sequenceNumber, "statusCode" -> "SYS", "message" -> r.toString)
         )
         logger.error("Json onSales response: " + result)
         result

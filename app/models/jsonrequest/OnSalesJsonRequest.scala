@@ -11,7 +11,6 @@ case class JsonRequestHeader(
 )
   
 case class JsonRequestPaging(
-  cursor: Int,
   offset: Int,
   limit: Int
 )
