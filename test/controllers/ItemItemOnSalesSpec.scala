@@ -20,6 +20,7 @@ import scredis.util.LinkedHashSet
 import scredis.parsing.IntParser
 import play.api.libs.json.JsArray
 import play.api.libs.json.JsNumber
+import testhelpers.Helper._
 
 @RunWith(classOf[JUnitRunner])
 class ItemItemOnSalesSpec extends Specification {
@@ -31,15 +32,8 @@ class ItemItemOnSalesSpec extends Specification {
     )
     
     "create valid redis request" in new WithServer(appWithMemoryDatabase, port = 3333) {
-      Redis.sync { redis =>
-        redis.flushDb()
-      }
-      
-      doWith(Redis.sync { redis =>
-        redis.zRangeWithScores[String]("itemSoldDates", end = -1)
-      }) { set =>
-        set.size === 0
-      }
+      Redis.sync { _.flushDb() }
+      doWith(Redis.sync { _.zRangeWithScores[String]("itemSoldDates", end = -1) }) { _.size === 0 }
 
       doWith(Await.result(
         WS.url("http://localhost:3333" + controllers.routes.RecommendByItem.bySingleItem())
@@ -608,9 +602,5 @@ class ItemItemOnSalesSpec extends Specification {
         set.contains("0001:5819", 0)
       }
     }
-  }
-
-  def doWith[T](arg: T)(func: T => Unit) {
-    func(arg)
   }
 }

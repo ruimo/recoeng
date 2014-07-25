@@ -5,6 +5,7 @@
 # Home page
 POST    /onSales                    controllers.ItemItem.onSales
 POST    /recommendBySingleItem      controllers.RecommendByItem.bySingleItem
+POST    /createItemRecommendBySite  controllers.ItemRecommendBySite.create
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

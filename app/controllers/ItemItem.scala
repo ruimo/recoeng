@@ -16,12 +16,6 @@ import scala.concurrent.Future
 import scala.util.Try
 
 object ItemItem extends Controller with HasLogger with JsonRequestHandler {
-  implicit val salesItemReads: Reads[SalesItem] = (
-    (JsPath \ "storeCode").read(regex("\\w{1,8}".r)) and
-    (JsPath \ "itemCode").read(regex("\\w{1,24}".r)) and
-    (JsPath \ "quantity").read[Int]
-  )(SalesItem(_, _, _))
-
   implicit val onSalesReads: Reads[OnSalesJsonRequest] = (
     (JsPath \ "header").read[JsonRequestHeader] and
     (JsPath \ "mode").read(regex("\\w{4}".r)) and

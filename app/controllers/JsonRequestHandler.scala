@@ -12,12 +12,24 @@ trait JsonRequestHandler {
   implicit val jsonRequestHeaderReads: Reads[JsonRequestHeader] = (
     (JsPath \ "dateTime").read(jodaDateReads("YYYYMMddHHmmss")) and
     (JsPath \ "sequenceNumber").read(regex("\\d{1,16}".r))
-  )(JsonRequestHeader(_, _))
+  )(JsonRequestHeader.apply _)
 
   implicit val jsonRequestPagingReads: Reads[JsonRequestPaging] = (
     (JsPath \ "offset").read[Int] and
     (JsPath \ "limit").read[Int]
   )(JsonRequestPaging.apply _)
+
+  implicit val salesItemReads: Reads[SalesItem] = (
+    (JsPath \ "storeCode").read(regex("\\w{1,8}".r)) and
+    (JsPath \ "itemCode").read(regex("\\w{1,24}".r)) and
+    (JsPath \ "quantity").read[Int]
+  )(SalesItem.apply _)
+
+  implicit val scoredItemReads: Reads[ScoredItem] = (
+    (JsPath \ "storeCode").read(regex("\\w{1,8}".r)) and
+    (JsPath \ "itemCode").read(regex("\\w{1,24}".r)) and
+    (JsPath \ "score").read[Double]
+  )(ScoredItem.apply _)
 
   def toJson(errors: Seq[(JsPath, Seq[ValidationError])]): JsValue =
     Json.toJson(errors.map {e => ErrorEntry(e._1, e._2)})

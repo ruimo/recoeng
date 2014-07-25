@@ -18,7 +18,7 @@ case class JsonRequestPaging(
 case class SalesItem(
   storeCode: String,
   itemCode: String,
-  quantity: Integer
+  quantity: Int
 ) {
   lazy val redisCode: String = storeCode + ":" + itemCode
 }
@@ -41,4 +41,19 @@ case class RecommendBySingleItemJsonRequest(
   paging: JsonRequestPaging
 ) {
   lazy val sortOrder: SortOrder = SortOrder(sort)
+}
+
+case class ScoredItem(
+  storeCode: String,
+  itemCode: String,
+  score: Double
+)
+
+case class CreateItemRecommendBySite(
+  header: JsonRequestHeader,
+  storeCode: String,
+  itemCode: String,
+  itemList: Seq[ScoredItem]
+) {
+  lazy val itemListAsMap: Map[String, Double] = itemList.map { e => (e.storeCode + ":" + e.itemCode, e.score) }.toMap
 }

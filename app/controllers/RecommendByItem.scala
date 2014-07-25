@@ -42,20 +42,18 @@ object RecommendByItem extends Controller with HasLogger with JsonRequestHandler
     )
   }
 
-  def handleBySingleItem(req: RecommendBySingleItemJsonRequest): Future[Result] =
+  def handleBySingleItem(req: RecommendBySingleItemJsonRequest): Future[Result] = {
+    val key = "itemItemSum1m:" + req.storeCode + ":" + req.itemCode
     Redis.pipelined1(Redis.SalesDb) { pipe =>
-      val key = "itemItemSum1m:" + req.storeCode + ":" + req.itemCode
-      Redis.pipelined1(Redis.SalesDb) { pipe =>
-        req.sortOrder match {
-          case Asc(col) =>
-            pipe.zRangeByScoreWithScores(
-              key, Score.Infinity, Score.Infinity, Some(req.paging.offset, req.paging.limit)
-            )
-          case Desc(col) =>
-            pipe.zRevRangeByScoreWithScores(
-              key, Score.Infinity, Score.Infinity, Some(req.paging.offset, req.paging.limit)
-            )
-        }
+      req.sortOrder match {
+        case Asc(col) =>
+          pipe.zRangeByScoreWithScores(
+            key, Score.Infinity, Score.Infinity, Some(req.paging.offset, req.paging.limit)
+          )
+        case Desc(col) =>
+          pipe.zRevRangeByScoreWithScores(
+            key, Score.Infinity, Score.Infinity, Some(req.paging.offset, req.paging.limit)
+          )
       }
     }.map { recs =>
       val result = Ok(Json.obj(
@@ -81,4 +79,5 @@ object RecommendByItem extends Controller with HasLogger with JsonRequestHandler
       logger.info("Json RecommendByItem.bySingleItem response: " + result)
       result
     }
+  }
 }

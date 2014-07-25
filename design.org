@@ -1,4 +1,4 @@
-* Example
+* Recommendation by sold item example
 
 Duration: 1 month
 
@@ -287,4 +287,54 @@ itemItem:0001:1491:20141002
 itemItem:0002:5810:20141002
 itemItem:0001:5819:20141002
 itemItem:0003:8172:20141002
+
+* Recommendation by site example
+
+** Create item recommendation by site
+
+Create record for the case where item 0001:5817 is purchased, recommend both 0001:4810, 0002:1048.
+
+|-------------+------|
+| storeCode   | 0001 |
+| itemCode    | 5817 |
+| itemList    |      |
+|-------------+------|
+| 　storeCode | 0001 |
+| 　itemCode  | 4810 |
+| 　score     |   40 |
+|-------------+------|
+| 　storeCode | 0002 |
+| 　itemCode  | 1048 |
+| 　score     |   10 |
+|-------------+------|
+
+** Query item recommendation by site
+
+When item 0001:5817 is purchased, query will be submit.
+
+|-----------+------|
+| header    |      |
+| storeCode | 0001 |
+| itemCode  | 5817 |
+| sort      |      |
+| paging    |      |
+| 　offset  | 0    |
+| 　limit   | 10   |
+|-----------+------|
+
+Response:
+
+|-------------+------|
+| storeCode   | 0001 |
+| itemCode    | 5817 |
+|-------------+------|
+| itemList    |      |
+| 　storeCode | 0001 |
+| 　itemCode  | 4810 |
+| 　score     |   40 |
+|-------------+------|
+| 　storeCode | 0002 |
+| 　itemCode  | 1048 |
+| 　score     |   10 |
+|-------------+------|
 
