@@ -25,6 +25,11 @@ trait JsonRequestHandler extends Controller with HasLogger {
     (JsPath \ "limit").read[Int]
   )(JsonRequestPaging.apply _)
 
+  implicit val jsonRequestCursorPagingReads: Reads[JsonRequestCursorPaging] = (
+    (JsPath \ "cursor").read(regex("\\d+".r)) and
+    (JsPath \ "limit").read[Int]
+  )(JsonRequestCursorPaging.apply _)
+
   implicit val salesItemReads: Reads[SalesItem] = (
     (JsPath \ "storeCode").read(regex("\\w{1,8}".r)) and
     (JsPath \ "itemCode").read(regex("\\w{1,24}".r)) and

@@ -127,20 +127,100 @@ class ItemRecommendBySiteSpec extends Specification {
             map("0002:1048") === JsNumber(10.0)
           }
         }
+      }
+
+      // Create another recommendation
+      doWith(Await.result(
+        WS.url("http://localhost:3333" + controllers.routes.ItemRecommendBySite.create())
+          .withHeaders("Content-Type" -> "application/json; charset=utf-8")
+          .post(Json.parse("""
+{
+  "header": {
+    "dateTime": "20140421234411",
+    "sequenceNumber": "3194730"
+  },
+  "storeCode": "0003",
+  "itemCode": "1834",
+  "itemList": [
+    {
+      "storeCode": "0001",
+      "itemCode": "4810",
+      "score": 40
+    },
+    {
+      "storeCode": "0005",
+      "itemCode": "1233",
+      "score": 10
+    }
+  ]
+}    
+            """)), Duration(10, SECONDS)
+      )) { response =>
+        response.status === 200
+        response.header("Content-Type").toString.indexOf("application/json") !== -1
+        val jsonResp = Json.parse(response.body)
+        jsonResp \ "sequenceNumber" === JsString("3194730")
+        jsonResp \ "statusCode" === JsString("OK")
+      }
+
+      doWith(Redis.sync { redis =>
+        redis.sMembers[String]("itemSite")
+      }) { set =>
+        set.size === 2
+        set.contains("0001:5817") must beTrue
+        set.contains("0003:1834") must beTrue
+      }
+
+      doWith(Redis.sync { redis =>
+        redis.zRangeWithScores[String]("itemItemSite:0001:5817", end = -1)
+      }) { set =>
+        set.size === 2
+        set.contains("0001:4810", 40.0) === true
+        set.contains("0002:1048", 10.0) === true
+      }
+
+      doWith(Redis.sync { redis =>
+        redis.zRangeWithScores[String]("itemItemSite:0003:1834", end = -1)
+      }) { set =>
+        set.size === 2
+        set.contains("0001:4810", 40.0) === true
+        set.contains("0005:1233", 10.0) === true
+      }
+
+      doWith(Await.result(
+        WS.url("http://localhost:3333" + controllers.routes.ItemRecommendBySite.list())
+          .withHeaders("Content-Type" -> "application/json; charset=utf-8")
+          .post(Json.parse("""
+{
+  "header": {
+    "dateTime": "20140421234411",
+    "sequenceNumber": "3194780"
+  },
+  "sort": "",
+  "cursorPaging": {
+    "cursor": "0",
+    "limit": 10
+  }
+}    
+            """)), Duration(10, SECONDS)
+      )) { response =>
+        response.status === 200
+        response.header("Content-Type").toString.indexOf("application/json") !== -1
+        val jsonResp = Json.parse(response.body)
+        jsonResp \ "sequenceNumber" === JsString("3194780")
+        jsonResp \ "statusCode" === JsString("OK")
+
         doWith((jsonResp \ "itemList").asInstanceOf[JsArray]) { itemList =>
           itemList.value.size === 2
           doWith(
             itemList.value.map { o =>
-              (
-                (o \ "storeCode").asInstanceOf[JsString].value +
-                ":" +
-                (o \ "itemCode").asInstanceOf[JsString].value,
-                o \ "score"
-              )
-            }.toMap
-          ) { map =>
-            map("0001:4810") === JsNumber(40.0)
-            map("0002:1048") === JsNumber(10.0)
+              (o \ "storeCode").asInstanceOf[JsString].value +
+              ":" +
+              (o \ "itemCode").asInstanceOf[JsString].value
+            }.toSet
+          ) { set =>
+            set.contains("0001:5817") must beTrue
+            set.contains("0003:1834") must beTrue
           }
         }
       }

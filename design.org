@@ -360,3 +360,40 @@ Response:
 | 　score     |   10 |
 |-------------+------|
 
+** Create another item recommendation by site
+
+Create record for the case where item 0001:5817 is purchased, recommend both 0001:4810, 0002:1048.
+
+|-------------+------|
+| storeCode   | 0003 |
+| itemCode    | 1834 |
+| itemList    |      |
+|-------------+------|
+| 　storeCode | 0001 |
+| 　itemCode  | 4810 |
+| 　score     |   40 |
+|-------------+------|
+| 　storeCode | 0005 |
+| 　itemCode  | 1233 |
+| 　score     |   10 |
+|-------------+------|
+
+itemItemSite:0003:1834(sorted set)
+|-----------+----|
+| 0001:4810 | 40 |
+| 0005:1233 | 10 |
+|-----------+----|
+
+itemSite(set)
+|-----------|
+| 0001:5817 |
+| 0003:1834 |
+|-----------|
+
+** Query items that are listed in site recommendation
+
+itemSite(set)
+|-----------|
+| 0001:5817 |
+| 0003:1834 |
+|-----------|

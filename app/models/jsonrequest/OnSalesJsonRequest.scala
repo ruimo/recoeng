@@ -15,6 +15,11 @@ case class JsonRequestPaging(
   limit: Int
 )
 
+case class JsonRequestCursorPaging(
+  cursor: String,
+  limit: Int
+)
+
 case class SalesItem(
   storeCode: String,
   itemCode: String,
@@ -51,8 +56,7 @@ case class ScoredItem(
 
 case class ListItemRecommendBySite(
   header: JsonRequestHeader,
-  sort: String,
-  paging: JsonRequestPaging
+  paging: JsonRequestCursorPaging
 )
 
 case class CreateItemRecommendBySite(

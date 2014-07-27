@@ -25,8 +25,7 @@ object ItemRecommendBySite extends Controller with HasLogger with JsonRequestHan
 
   implicit val listItemRecommendBySiteReads: Reads[ListItemRecommendBySite] = (
     (JsPath \ "header").read[JsonRequestHeader] and
-    (JsPath \ "sort").read(regex("\\w{0,64}".r)) and
-    (JsPath \ "paging").read[JsonRequestPaging]
+    (JsPath \ "cursorPaging").read[JsonRequestCursorPaging]
   )(ListItemRecommendBySite.apply _)
 
   def create = Action.async(BodyParsers.parse.json) { request =>
@@ -76,16 +75,21 @@ object ItemRecommendBySite extends Controller with HasLogger with JsonRequestHan
   }
 
   def handleList(req: ListItemRecommendBySite): Future[Result] = {
+    val cursor = req.paging.cursor.toLong
+
     Redis.pipelined1(Redis.SalesDb) {
-      _.keys("itemItemSite:*") 
-    }.map { set =>
+      _.sScan[String]("itemSite")(cursor, Some(req.paging.limit)) 
+    }.map { t =>
+      val nextCursor: Long = t._1
+      val rec: Set[String] = t._2
+
       Ok(
         Json.obj(
           "sequenceNumber" -> req.header.sequenceNumber,
           "statusCode" -> "OK",
           "message" -> "",
           "itemList" -> JsArray(
-            set.toSeq.map { e =>
+            rec.toSeq.map { e =>
               val key = e.split(":")
               Json.obj(
                 "storeCode" -> key(0),
@@ -93,7 +97,10 @@ object ItemRecommendBySite extends Controller with HasLogger with JsonRequestHan
               )
             }
           ),
-          "sort" -> req.sort
+          "cursorPaging" -> Json.obj(
+            "cursor" -> nextCursor.toString,
+            "limit" -> req.paging.limit
+          )
         )
       )
     }
