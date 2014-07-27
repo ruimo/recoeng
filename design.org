@@ -308,7 +308,19 @@ Create record for the case where item 0001:5817 is purchased, recommend both 000
 | 　score     |   10 |
 |-------------+------|
 
+itemItemSite:0001:5817(sorted set)
+|-----------+----|
+| 0001:4810 | 40 |
+| 0002:1048 | 10 |
+|-----------+----|
+
 ** Query item recommendation by site
+
+itemItemSite:0001:5817(sorted set)
+|-----------+----|
+| 0001:4810 | 40 |
+| 0002:1048 | 10 |
+|-----------+----|
 
 When item 0001:5817 is purchased, query will be submit.
 

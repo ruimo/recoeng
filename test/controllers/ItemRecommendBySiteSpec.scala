@@ -24,9 +24,11 @@ import play.api.Play.current
 import play.api.libs.json.JsString
 import play.api.test.Helpers._
 import play.api.test._
+import play.api.libs.json.JsArray
+import play.api.libs.json.JsNumber
 
 @RunWith(classOf[JUnitRunner])
-class RecommendByItemSpec extends Specification {
+class ItemRecommendBySiteSpec extends Specification {
   "recommend by item controller" should {
     val appWithMemoryDatabase = FakeApplication(
       additionalConfiguration = inMemoryDatabase("default") + ("redis.db.base" -> Redis.DbOffsetForTest)
@@ -63,12 +65,61 @@ class RecommendByItemSpec extends Specification {
             """)), Duration(10, SECONDS)
       )) { response =>
         response.status === 200
-println("header = " + response.header("Content-Type"))
-println("body = " + response.body)
         response.header("Content-Type").toString.indexOf("application/json") !== -1
         val jsonResp = Json.parse(response.body)
         jsonResp \ "sequenceNumber" === JsString("3194710")
         jsonResp \ "statusCode" === JsString("OK")
+      }
+
+      doWith(Redis.sync { redis =>
+        redis.zRangeWithScores[String]("itemItemSite:0001:5817", end = -1)
+      }) { set =>
+        set.size === 2
+        set.contains("0001:4810", 40.0) === true
+        set.contains("0002:1048", 10.0) === true
+      }
+
+      doWith(Await.result(
+        WS.url("http://localhost:3333" + controllers.routes.ItemRecommendBySite.bySingleItem())
+          .withHeaders("Content-Type" -> "application/json; charset=utf-8")
+          .post(Json.parse("""
+{
+  "header": {
+    "dateTime": "20140421234411",
+    "sequenceNumber": "3194720"
+  },
+  "storeCode": "0001",
+  "itemCode": "5817",
+  "sort": "desc(cost)",
+  "paging": {
+    "offset": 0,
+    "limit": 10
+  }
+}    
+            """)), Duration(10, SECONDS)
+      )) { response =>
+        response.status === 200
+        response.header("Content-Type").toString.indexOf("application/json") !== -1
+        val jsonResp = Json.parse(response.body)
+        jsonResp \ "sequenceNumber" === JsString("3194720")
+        jsonResp \ "statusCode" === JsString("OK")
+
+        doWith((jsonResp \ "itemList").asInstanceOf[JsArray]) { itemList =>
+          itemList.value.size === 2
+          doWith(
+            itemList.value.map { o =>
+              (
+                (o \ "storeCode").asInstanceOf[JsString].value +
+                ":" +
+                (o \ "itemCode").asInstanceOf[JsString].value,
+                o \ "score"
+              )
+            }.toMap
+          ) { map =>
+            map("0001:4810") === JsNumber(40.0)
+            map("0002:1048") === JsNumber(10.0)
+          }
+        }
       }
     } 
   }

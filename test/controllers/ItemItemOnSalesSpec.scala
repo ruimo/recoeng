@@ -105,9 +105,9 @@ class ItemItemOnSalesSpec extends Specification {
         redis.zRangeWithScores[String]("itemSoldDates", end = -1)
       }) { set =>
         set.size === 3
-        set.contains("0001:1491:20141002", 20141002)
-        set.contains("0002:5810:20141002", 20141002)
-        set.contains("0001:5819:20141002", 20141002)
+        set.contains("0001:1491:20141002", 20141002) must beTrue
+        set.contains("0002:5810:20141002", 20141002) must beTrue
+        set.contains("0001:5819:20141002", 20141002) must beTrue
       }
       
       doWith(Redis.sync { redis =>
@@ -141,24 +141,24 @@ class ItemItemOnSalesSpec extends Specification {
         redis.zRangeWithScores[String]("itemItemSum1m:0001:1491", end = -1)
       }) { set =>
         set.size === 2
-        set.contains("0002:5810", 1)
-        set.contains("0001:5819", 1)
+        set.contains("0002:5810", 1) must beTrue
+        set.contains("0001:5819", 1) must beTrue
       }
 
       doWith(Redis.sync { redis =>
         redis.zRangeWithScores[String]("itemItemSum1m:0002:5810", end = -1)
       }) { set =>
         set.size === 2
-        set.contains("0001:1491", 1)
-        set.contains("0001:5819", 1)
+        set.contains("0001:1491", 1) must beTrue
+        set.contains("0001:5819", 1) must beTrue
       }
 
       doWith(Redis.sync { redis =>
         redis.zRangeWithScores[String]("itemItemSum1m:0001:5819", end = -1)
       }) { set =>
         set.size === 2
-        set.contains("0001:1491", 1)
-        set.contains("0002:5810", 1)
+        set.contains("0001:1491", 1) must beTrue
+        set.contains("0002:5810", 1) must beTrue
       }
 
       doWith(Await.result(
@@ -246,10 +246,10 @@ class ItemItemOnSalesSpec extends Specification {
         redis.zRangeWithScores[String]("itemSoldDates", end = -1)
       }) { set =>
         set.size === 4
-        set.contains("0001:1491:20141002", 20141002)
-        set.contains("0002:5810:20141002", 20141002)
-        set.contains("0001:5819:20141002", 20141002)
-        set.contains("0003:8172:20141002", 20141002)
+        set.contains("0001:1491:20141002", 20141002) must beTrue
+        set.contains("0002:5810:20141002", 20141002) must beTrue
+        set.contains("0001:5819:20141002", 20141002) must beTrue
+        set.contains("0003:8172:20141002", 20141002) must beTrue
       }
       
       doWith(Redis.sync { redis =>
@@ -294,34 +294,34 @@ class ItemItemOnSalesSpec extends Specification {
         redis.zRangeWithScores[String]("itemItemSum1m:0001:1491", end = -1)
       }) { set =>
         set.size === 3
-        set.contains("0002:5810", 1)
-        set.contains("0001:5819", 2)
-        set.contains("0003:8172", 1)
+        set.contains("0002:5810", 1) must beTrue
+        set.contains("0001:5819", 2) must beTrue
+        set.contains("0003:8172", 1) must beTrue
       }
 
       doWith(Redis.sync { redis =>
         redis.zRangeWithScores[String]("itemItemSum1m:0002:5810", end = -1)
       }) { set =>
         set.size === 2
-        set.contains("0001:1491", 1)
-        set.contains("0001:5819", 1)
+        set.contains("0001:1491", 1) must beTrue
+        set.contains("0001:5819", 1) must beTrue
       }
 
       doWith(Redis.sync { redis =>
         redis.zRangeWithScores[String]("itemItemSum1m:0001:5819", end = -1)
       }) { set =>
         set.size === 3
-        set.contains("0001:1491", 2)
-        set.contains("0002:5810", 1)
-        set.contains("0003:8172", 1)
+        set.contains("0001:1491", 2) must beTrue
+        set.contains("0002:5810", 1) must beTrue
+        set.contains("0003:8172", 1) must beTrue
       }
 
       doWith(Redis.sync { redis =>
         redis.zRangeWithScores[String]("itemItemSum1m:0003:8172", end = -1)
       }) { set =>
         set.size === 2
-        set.contains("0001:1491", 1)
-        set.contains("0001:5819", 1)
+        set.contains("0001:1491", 1) must beTrue
+        set.contains("0001:5819", 1) must beTrue
       }
 
       doWith(Await.result(
@@ -362,12 +362,12 @@ class ItemItemOnSalesSpec extends Specification {
         redis.zRangeWithScores[String]("itemSoldDates", end = -1)
       }) { set =>
         set.size === 6
-        set.contains("0001:1491:20141002", 20141002)
-        set.contains("0002:5810:20141002", 20141002)
-        set.contains("0001:5819:20141002", 20141002)
-        set.contains("0003:8172:20141002", 20141002)
-        set.contains("0001:1491:20141010", 20141010)
-        set.contains("0003:8172:20141010", 20141010)
+        set.contains("0001:1491:20141002", 20141002) must beTrue
+        set.contains("0002:5810:20141002", 20141002) must beTrue
+        set.contains("0001:5819:20141002", 20141002) must beTrue
+        set.contains("0003:8172:20141002", 20141002) must beTrue
+        set.contains("0001:1491:20141010", 20141010) must beTrue
+        set.contains("0003:8172:20141010", 20141010) must beTrue
       }
       
       doWith(Redis.sync { redis =>
@@ -428,34 +428,34 @@ class ItemItemOnSalesSpec extends Specification {
         redis.zRangeWithScores[String]("itemItemSum1m:0001:1491", end = -1)
       }) { set =>
         set.size === 3
-        set.contains("0002:5810", 1)
-        set.contains("0001:5819", 2)
-        set.contains("0003:8172", 2)
+        set.contains("0002:5810", 1) must beTrue
+        set.contains("0001:5819", 2) must beTrue
+        set.contains("0003:8172", 2) must beTrue
       }
 
       doWith(Redis.sync { redis =>
         redis.zRangeWithScores[String]("itemItemSum1m:0002:5810", end = -1)
       }) { set =>
         set.size === 2
-        set.contains("0001:1491", 1)
-        set.contains("0001:5819", 1)
+        set.contains("0001:1491", 1) must beTrue
+        set.contains("0001:5819", 1) must beTrue
       }
 
       doWith(Redis.sync { redis =>
         redis.zRangeWithScores[String]("itemItemSum1m:0001:5819", end = -1)
       }) { set =>
         set.size === 3
-        set.contains("0001:1491", 2)
-        set.contains("0002:5810", 1)
-        set.contains("0003:8172", 1)
+        set.contains("0001:1491", 2) must beTrue
+        set.contains("0002:5810", 1) must beTrue
+        set.contains("0003:8172", 1) must beTrue
       }
 
       doWith(Redis.sync { redis =>
         redis.zRangeWithScores[String]("itemItemSum1m:0003:8172", end = -1)
       }) { set =>
         set.size === 2
-        set.contains("0001:1491", 2)
-        set.contains("0001:5819", 1)
+        set.contains("0001:1491", 2) must beTrue
+        set.contains("0001:5819", 1) must beTrue
       }
 
       doWith(Await.result(
@@ -548,8 +548,8 @@ class ItemItemOnSalesSpec extends Specification {
         redis.zRangeWithScores[String]("itemSoldDates", end = -1)
       }) { set =>
         set.size === 2
-        set.contains("0001:1491:20141010", 20141010)
-        set.contains("0003:8172:20141010", 20141010)
+        set.contains("0001:1491:20141010", 20141010) must beTrue
+        set.contains("0003:8172:20141010", 20141010) must beTrue
       }
       
       doWith(Redis.sync { _.keys("itemItem:0001:1491:20141002") }) { _.size === 0 }
@@ -572,34 +572,34 @@ class ItemItemOnSalesSpec extends Specification {
         redis.zRangeWithScores[String]("itemItemSum1m:0001:1491", end = -1)
       }) { set =>
         set.size === 3
-        set.contains("0002:5810", 0)
-        set.contains("0001:5819", 0)
-        set.contains("0003:8172", 1)
+        set.contains("0002:5810", 0) must beTrue
+        set.contains("0001:5819", 0) must beTrue
+        set.contains("0003:8172", 1) must beTrue
       }
 
       doWith(Redis.sync { redis =>
         redis.zRangeWithScores[String]("itemItemSum1m:0002:5810", end = -1)
       }) { set =>
         set.size === 2
-        set.contains("0001:1491", 0)
-        set.contains("0001:5819", 0)
+        set.contains("0001:1491", 0) must beTrue
+        set.contains("0001:5819", 0) must beTrue
       }
 
       doWith(Redis.sync { redis =>
         redis.zRangeWithScores[String]("itemItemSum1m:0001:5819", end = -1)
       }) { set =>
         set.size === 3
-        set.contains("0001:1491", 0)
-        set.contains("0002:5810", 0)
-        set.contains("0003:8172", 0)
+        set.contains("0001:1491", 0) must beTrue
+        set.contains("0002:5810", 0) must beTrue
+        set.contains("0003:8172", 0) must beTrue
       }
 
       doWith(Redis.sync { redis =>
         redis.zRangeWithScores[String]("itemItemSum1m:0003:8172", end = -1)
       }) { set =>
         set.size === 2
-        set.contains("0001:1491", 1)
-        set.contains("0001:5819", 0)
+        set.contains("0001:1491", 1) must beTrue
+        set.contains("0001:5819", 0) must beTrue
       }
     }
   }

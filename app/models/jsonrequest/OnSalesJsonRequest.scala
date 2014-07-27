@@ -49,6 +49,12 @@ case class ScoredItem(
   score: Double
 )
 
+case class ListItemRecommendBySite(
+  header: JsonRequestHeader,
+  sort: String,
+  paging: JsonRequestPaging
+)
+
 case class CreateItemRecommendBySite(
   header: JsonRequestHeader,
   storeCode: String,
