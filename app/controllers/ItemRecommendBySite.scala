@@ -42,12 +42,26 @@ object ItemRecommendBySite extends Controller with HasLogger with JsonRequestHan
     )
   }
 
+  def list = Action.async(BodyParsers.parse.json) { request =>
+    request.body.validate[ListItemRecommendBySite].fold(
+      errors => {
+        logger.error("Json ItemRecommendBySite.list request validation error: " + errors)
+        Future {BadRequest(toJson(errors))}
+      },
+      req => {
+        logger.info("Json ItemRecommendBySite.list request: " + req)
+        handleList(req)
+      }
+    )
+  }
+
   def handleCreate(req: CreateItemRecommendBySite): Future[Result] = {
+    val key = req.storeCode + ":" + req.itemCode
     Redis.pipelined(Redis.SalesDb) { pipe =>
       pipe.zAddFromMap(
-        "itemItemSite:" + req.storeCode + ":" + req.itemCode, 
-        req.itemListAsMap.asInstanceOf[Map[Any, Double]]
+        "itemItemSite:" + key, req.itemListAsMap.asInstanceOf[Map[Any, Double]]
       )
+      pipe.sAdd("itemSite", key)
     }
 
     Future {
@@ -56,6 +70,30 @@ object ItemRecommendBySite extends Controller with HasLogger with JsonRequestHan
           "sequenceNumber" -> req.header.sequenceNumber,
           "statusCode" -> "OK",
           "message" -> ""
+        )
+      )
+    }
+  }
+
+  def handleList(req: ListItemRecommendBySite): Future[Result] = {
+    Redis.pipelined1(Redis.SalesDb) {
+      _.keys("itemItemSite:*") 
+    }.map { set =>
+      Ok(
+        Json.obj(
+          "sequenceNumber" -> req.header.sequenceNumber,
+          "statusCode" -> "OK",
+          "message" -> "",
+          "itemList" -> JsArray(
+            set.toSeq.map { e =>
+              val key = e.split(":")
+              Json.obj(
+                "storeCode" -> key(0),
+                "itemCode" -> key(1)
+              )
+            }
+          ),
+          "sort" -> req.sort
         )
       )
     }

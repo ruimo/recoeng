@@ -314,6 +314,11 @@ itemItemSite:0001:5817(sorted set)
 | 0002:1048 | 10 |
 |-----------+----|
 
+itemSite(set)
+|-----------|
+| 0001:5817 |
+|-----------|
+
 ** Query item recommendation by site
 
 itemItemSite:0001:5817(sorted set)
@@ -321,6 +326,11 @@ itemItemSite:0001:5817(sorted set)
 | 0001:4810 | 40 |
 | 0002:1048 | 10 |
 |-----------+----|
+
+itemSite(set)
+|-----------|
+| 0001:5817 |
+|-----------|
 
 When item 0001:5817 is purchased, query will be submit.
 

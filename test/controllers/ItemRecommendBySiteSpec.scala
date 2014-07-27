@@ -72,6 +72,13 @@ class ItemRecommendBySiteSpec extends Specification {
       }
 
       doWith(Redis.sync { redis =>
+        redis.sMembers[String]("itemSite")
+      }) { set =>
+        set.size === 1
+        set.contains("0001:5817") must beTrue
+      }
+
+      doWith(Redis.sync { redis =>
         redis.zRangeWithScores[String]("itemItemSite:0001:5817", end = -1)
       }) { set =>
         set.size === 2
@@ -104,6 +111,22 @@ class ItemRecommendBySiteSpec extends Specification {
         jsonResp \ "sequenceNumber" === JsString("3194720")
         jsonResp \ "statusCode" === JsString("OK")
 
+        doWith((jsonResp \ "itemList").asInstanceOf[JsArray]) { itemList =>
+          itemList.value.size === 2
+          doWith(
+            itemList.value.map { o =>
+              (
+                (o \ "storeCode").asInstanceOf[JsString].value +
+                ":" +
+                (o \ "itemCode").asInstanceOf[JsString].value,
+                o \ "score"
+              )
+            }.toMap
+          ) { map =>
+            map("0001:4810") === JsNumber(40.0)
+            map("0002:1048") === JsNumber(10.0)
+          }
+        }
         doWith((jsonResp \ "itemList").asInstanceOf[JsArray]) { itemList =>
           itemList.value.size === 2
           doWith(

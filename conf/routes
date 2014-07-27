@@ -6,6 +6,7 @@
 POST    /onSales                    controllers.ItemItem.onSales
 POST    /recommendBySingleItem      controllers.RecommendByItem.bySingleItem
 POST    /createItemRecommendBySite  controllers.ItemRecommendBySite.create
+POST    /listItemRecommendBySite    controllers.ItemRecommendBySite.list
 POST    /recommendBySiteSingleItem  controllers.ItemRecommendBySite.bySingleItem
 
 # Map static resources from the /public folder to the /assets URL path
