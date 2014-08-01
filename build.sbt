@@ -1,4 +1,4 @@
-name := """recoenv"""
+name := """recoeng"""
 
 version := "1.0-SNAPSHOT"
 
