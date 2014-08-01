@@ -2,7 +2,6 @@ package controllers
 
 import com.typesafe.config.{ ConfigFactory, Config }
 import play.api.mvc._
-import models.jsonrequest._
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
@@ -14,6 +13,14 @@ import helpers.ErrorEntry
 import helpers.Redis
 import scala.concurrent.Future
 import scala.util.Try
+import com.ruimo.recoeng.json.RecommendBySingleItemJsonRequest
+import com.ruimo.recoeng.json.Asc
+import com.ruimo.recoeng.json.CreateItemRecommendBySite
+import com.ruimo.recoeng.json.ListItemRecommendBySite
+import com.ruimo.recoeng.json.JsonRequestHeader
+import com.ruimo.recoeng.json.JsonRequestCursorPaging
+import com.ruimo.recoeng.json.ScoredItem
+import com.ruimo.recoeng.json.Desc
 
 object ItemRecommendBySite extends Controller with HasLogger with JsonRequestHandler {
   implicit val createItemRecommendBySiteReads: Reads[CreateItemRecommendBySite] = (

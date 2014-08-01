@@ -9,7 +9,7 @@ import helpers.Redis
 import org.joda.time.DateTime
 import scredis.PipelineClient
 import scredis.Score
-import helpers.Formatters._
+import com.ruimo.recoeng.json.Formatters._
 import scala.concurrent.Await
 import scredis.util.LinkedHashSet
 import scala.concurrent.Future

@@ -4,7 +4,6 @@ import play.api.data.validation.ValidationError
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
-import models.jsonrequest._
 import helpers.JsConstraints._
 import helpers.ErrorEntry
 import scala.concurrent.Future
@@ -13,6 +12,14 @@ import scredis.Score
 import play.api.mvc.Controller
 import play.api.mvc.Result
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import com.ruimo.recoeng.json.JsonRequestHeader
+import com.ruimo.recoeng.json.JsonRequestPaging
+import com.ruimo.recoeng.json.JsonRequestCursorPaging
+import com.ruimo.recoeng.json.SalesItem
+import com.ruimo.recoeng.json.RecommendBySingleItemJsonRequest
+import com.ruimo.recoeng.json.ScoredItem
+import com.ruimo.recoeng.json.Asc
+import com.ruimo.recoeng.json.Desc
 
 trait JsonRequestHandler extends Controller with HasLogger {
   implicit val jsonRequestHeaderReads: Reads[JsonRequestHeader] = (

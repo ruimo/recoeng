@@ -2,7 +2,6 @@ package controllers
 
 import com.typesafe.config.{ ConfigFactory, Config }
 import play.api.mvc._
-import models.jsonrequest.{SalesItem, JsonRequestHeader, OnSalesJsonRequest}
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
@@ -13,9 +12,11 @@ import helpers.JsConstraints._
 import helpers.Redis
 import scala.concurrent.Future
 import scala.util.Try
-import models.jsonrequest._
 import scredis.util.LinkedHashSet
 import scredis.Score
+import com.ruimo.recoeng.json.RecommendBySingleItemJsonRequest
+import com.ruimo.recoeng.json.Asc
+import com.ruimo.recoeng.json.Desc
 
 object RecommendByItem extends Controller with HasLogger with JsonRequestHandler {
   def bySingleItem = Action.async(BodyParsers.parse.json) { request =>

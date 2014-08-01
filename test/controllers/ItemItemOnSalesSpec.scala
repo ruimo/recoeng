@@ -3,10 +3,7 @@ package controllers
 import org.specs2.mutable._
 import org.specs2.runner._
 import org.junit.runner._
-import models.jsonrequest.OnSalesJsonRequest
-import models.jsonrequest.JsonRequestHeader
 import org.joda.time.format.DateTimeFormat
-import models.jsonrequest.SalesItem
 import play.api.test._
 import play.api.test.Helpers._
 import play.api.libs.json.Json

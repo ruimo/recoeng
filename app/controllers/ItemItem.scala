@@ -2,7 +2,6 @@ package controllers
 
 import com.typesafe.config.{ ConfigFactory, Config }
 import play.api.mvc._
-import models.jsonrequest.{SalesItem, JsonRequestHeader, OnSalesJsonRequest}
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
@@ -14,6 +13,9 @@ import helpers.ErrorEntry
 import helpers.Redis
 import scala.concurrent.Future
 import scala.util.Try
+import com.ruimo.recoeng.json.OnSalesJsonRequest
+import com.ruimo.recoeng.json.SalesItem
+import com.ruimo.recoeng.json.JsonRequestHeader
 
 object ItemItem extends Controller with HasLogger with JsonRequestHandler {
   implicit val onSalesReads: Reads[OnSalesJsonRequest] = (
