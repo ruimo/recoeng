@@ -11,7 +11,7 @@
     "dateTime": "20140421234411",
     "sequenceNumber": "3194710"
   },
-  "mode": "0",
+  "transactionMode": "0",
   "dateTime": "20140421234411",
   "userCode": "1",
   "itemList": [
@@ -32,7 +32,7 @@
 | header           |     |                |                          |
 | 　dateTime       | C14 | YYYYMMDDhhmmss | リクエスト日時           |
 | 　sequenceNumber | C16 | [0-9]          | リクエストごとに一意な値 |
-| mode             | C4  | 0001: Sales    |                          |
+| transactionMode  | C4  | 0001: Sales    |                          |
 | dateTime         | C14 | YYYYMMDDhhmmss | 取引日時                 |
 | userCode         | C8  | [A-Za-z0-9_]   |                          |
 | itemList         |     |                |                          |
