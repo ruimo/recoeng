@@ -44,9 +44,11 @@
 ** レスポンス
 
 {
-  "sequenceNumber": "3194710",
-  "statusCode": 0,
-  "message": ""
+  "header": {
+    "sequenceNumber": "3194710",
+    "statusCode": "OK",
+    "message": ""
+  }
 }
 
 |----------------+-----+--------------+----------------------------|
@@ -91,9 +93,11 @@
 ** レスポンス
 
 {
-  "sequenceNumber": "3194710",
-  "statusCode": 0,
-  "message": ""
+  "header": {
+    "sequenceNumber": "3194710",
+    "statusCode": "OK",
+    "message": ""
+  },
   "itemList": [
     {
       "storeCode": "4",
@@ -170,9 +174,11 @@
 ** レスポンス
 
 {
-  "sequenceNumber": "3194710",
-  "statusCode": 0,
-  "message": ""
+  "header": {
+    "sequenceNumber": "3194710",
+    "statusCode": "OK",
+    "message": ""
+  }
 }
 
 |----------------+-----+--------------+----------------------------|
@@ -214,9 +220,11 @@
 ** レスポンス
 
 {
-  "sequenceNumber": "3194710",
-  "statusCode": 0,
-  "message": ""
+  "header": {
+    "sequenceNumber": "3194710",
+    "statusCode": "OK",
+    "message": ""
+  },
   "itemList": [
     {
       "storeCode": "4",

@@ -73,9 +73,11 @@ object ItemRecommendBySite extends Controller with HasLogger with JsonRequestHan
     Future {
       Ok(
         Json.obj(
-          "sequenceNumber" -> req.header.sequenceNumber,
-          "statusCode" -> "OK",
-          "message" -> ""
+          "header" -> Json.obj(
+            "sequenceNumber" -> req.header.sequenceNumber,
+            "statusCode" -> "OK",
+            "message" -> ""
+          )
         )
       )
     }
@@ -92,9 +94,11 @@ object ItemRecommendBySite extends Controller with HasLogger with JsonRequestHan
 
       Ok(
         Json.obj(
-          "sequenceNumber" -> req.header.sequenceNumber,
-          "statusCode" -> "OK",
-          "message" -> "",
+          "header" -> Json.obj(
+            "sequenceNumber" -> req.header.sequenceNumber,
+            "statusCode" -> "OK",
+            "message" -> ""
+          ),
           "itemList" -> JsArray(
             rec.toSeq.map { e =>
               val key = e.split(":")

@@ -67,8 +67,10 @@ class ItemRecommendBySiteSpec extends Specification {
         response.status === 200
         response.header("Content-Type").toString.indexOf("application/json") !== -1
         val jsonResp = Json.parse(response.body)
-        jsonResp \ "sequenceNumber" === JsString("3194710")
-        jsonResp \ "statusCode" === JsString("OK")
+        doWith(jsonResp \ "header") { header =>
+          header \ "sequenceNumber" === JsString("3194710")
+          header \ "statusCode" === JsString("OK")
+        }
       }
 
       doWith(Redis.sync { redis =>
@@ -108,8 +110,10 @@ class ItemRecommendBySiteSpec extends Specification {
         response.status === 200
         response.header("Content-Type").toString.indexOf("application/json") !== -1
         val jsonResp = Json.parse(response.body)
-        jsonResp \ "sequenceNumber" === JsString("3194720")
-        jsonResp \ "statusCode" === JsString("OK")
+        doWith(jsonResp \ "header") { header =>
+          header \ "sequenceNumber" === JsString("3194720")
+          header \ "statusCode" === JsString("OK")
+        }
 
         doWith((jsonResp \ "itemList").asInstanceOf[JsArray]) { itemList =>
           itemList.value.size === 2
@@ -159,8 +163,10 @@ class ItemRecommendBySiteSpec extends Specification {
         response.status === 200
         response.header("Content-Type").toString.indexOf("application/json") !== -1
         val jsonResp = Json.parse(response.body)
-        jsonResp \ "sequenceNumber" === JsString("3194730")
-        jsonResp \ "statusCode" === JsString("OK")
+        doWith(jsonResp \ "header") { header =>
+          header \ "sequenceNumber" === JsString("3194730")
+          header \ "statusCode" === JsString("OK")
+        }
       }
 
       doWith(Redis.sync { redis =>
@@ -207,8 +213,10 @@ class ItemRecommendBySiteSpec extends Specification {
         response.status === 200
         response.header("Content-Type").toString.indexOf("application/json") !== -1
         val jsonResp = Json.parse(response.body)
-        jsonResp \ "sequenceNumber" === JsString("3194780")
-        jsonResp \ "statusCode" === JsString("OK")
+        doWith(jsonResp \ "header") { header =>
+          header \ "sequenceNumber" === JsString("3194780")
+          header \ "statusCode" === JsString("OK")
+        }
 
         doWith((jsonResp \ "itemList").asInstanceOf[JsArray]) { itemList =>
           itemList.value.size === 2

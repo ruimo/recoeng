@@ -54,8 +54,10 @@ class ItemItemOnSalesSpec extends Specification {
         response.status === 200
         response.header("Content-Type").toString.indexOf("application/json") !== -1
         val jsonResp = Json.parse(response.body)
-        jsonResp \ "sequenceNumber" === JsString("3194710")
-        jsonResp \ "statusCode" === JsString("OK")
+        doWith(jsonResp \ "header") { header =>
+          header \ "sequenceNumber" === JsString("3194710")
+          header \ "statusCode" === JsString("OK")
+        }
         (jsonResp \ "itemList").asInstanceOf[JsArray].value.size === 0
       }        
 
@@ -68,7 +70,7 @@ class ItemItemOnSalesSpec extends Specification {
     "dateTime": "20141002112233",
     "sequenceNumber": "12345"
   },
-  "mode": "0001",
+  "transactionMode": "0001",
   "dateTime": "20141002112233",
   "userCode": "1",
   "itemList": [
@@ -94,8 +96,10 @@ class ItemItemOnSalesSpec extends Specification {
         response.status === 200
         response.header("Content-Type").toString.indexOf("application/json") !== -1
         val jsonResp = Json.parse(response.body)
-        jsonResp \ "sequenceNumber" === JsString("12345")
-        jsonResp \ "statusCode" === JsString("OK")
+        doWith(jsonResp \ "header") { header =>
+          header \ "sequenceNumber" === JsString("12345")
+          header \ "statusCode" === JsString("OK")
+        }
       }
 
       doWith(Redis.sync { redis =>
@@ -180,8 +184,10 @@ class ItemItemOnSalesSpec extends Specification {
         response.status === 200
         response.header("Content-Type").toString.indexOf("application/json") !== -1
         val jsonResp = Json.parse(response.body)
-        jsonResp \ "sequenceNumber" === JsString("3194711")
-        jsonResp \ "statusCode" === JsString("OK")
+        doWith(jsonResp \ "header") { header =>
+          header \ "sequenceNumber" === JsString("3194711")
+          header \ "statusCode" === JsString("OK")
+        }
         doWith((jsonResp \ "itemList").asInstanceOf[JsArray]) { itemList =>
           itemList.value.size === 2
           doWith(
@@ -209,7 +215,7 @@ class ItemItemOnSalesSpec extends Specification {
     "dateTime": "20141003000000",
     "sequenceNumber": "23456"
   },
-  "mode": "0001",
+  "transactionMode": "0001",
   "dateTime": "20141002223344",
   "userCode": "1",
   "itemList": [
@@ -235,8 +241,10 @@ class ItemItemOnSalesSpec extends Specification {
         response.status === 200
         response.header("Content-Type").toString.indexOf("application/json") !== -1
         val jsonResp = Json.parse(response.body)
-        jsonResp \ "sequenceNumber" === JsString("23456")
-        jsonResp \ "statusCode" === JsString("OK")
+        doWith(jsonResp \ "header") { header =>
+          header \ "sequenceNumber" === JsString("23456")
+          header \ "statusCode" === JsString("OK")
+        }
       }
 
       doWith(Redis.sync { redis =>
@@ -330,7 +338,7 @@ class ItemItemOnSalesSpec extends Specification {
     "dateTime": "20141010112233",
     "sequenceNumber": "34567"
   },
-  "mode": "0001",
+  "transactionMode": "0001",
   "dateTime": "20141010111111",
   "userCode": "1",
   "itemList": [
@@ -351,8 +359,10 @@ class ItemItemOnSalesSpec extends Specification {
         response.status === 200
         response.header("Content-Type").toString.indexOf("application/json") !== -1
         val jsonResp = Json.parse(response.body)
-        jsonResp \ "sequenceNumber" === JsString("34567")
-        jsonResp \ "statusCode" === JsString("OK")
+        doWith(jsonResp \ "header") { header =>
+          header \ "sequenceNumber" === JsString("34567")
+          header \ "statusCode" === JsString("OK")
+        }
       }
 
       doWith(Redis.sync { redis =>
@@ -477,8 +487,10 @@ class ItemItemOnSalesSpec extends Specification {
         response.status === 200
         response.header("Content-Type").toString.indexOf("application/json") !== -1
         val jsonResp = Json.parse(response.body)
-        jsonResp \ "sequenceNumber" === JsString("3194712")
-        jsonResp \ "statusCode" === JsString("OK")
+        doWith(jsonResp \ "header") { header =>
+          header \ "sequenceNumber" === JsString("3194712")
+          header \ "statusCode" === JsString("OK")
+        }
         doWith((jsonResp \ "itemList").asInstanceOf[JsArray]) { itemList =>
           itemList.value.size === 2
           doWith(
@@ -519,8 +531,10 @@ class ItemItemOnSalesSpec extends Specification {
         response.status === 200
         response.header("Content-Type").toString.indexOf("application/json") !== -1
         val jsonResp = Json.parse(response.body)
-        jsonResp \ "sequenceNumber" === JsString("3194712")
-        jsonResp \ "statusCode" === JsString("OK")
+        doWith(jsonResp \ "header") { header =>
+          header \ "sequenceNumber" === JsString("3194712")
+          header \ "statusCode" === JsString("OK")
+        }
         doWith((jsonResp \ "itemList").asInstanceOf[JsArray]) { itemList =>
           itemList.value.size === 1
           doWith(

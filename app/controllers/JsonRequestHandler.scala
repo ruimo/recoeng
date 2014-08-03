@@ -75,9 +75,11 @@ trait JsonRequestHandler extends Controller with HasLogger {
       }
     }.map { recs =>
       val result = Ok(Json.obj(
-        "sequenceNumber" -> req.header.sequenceNumber,
-        "statusCode" -> "OK",
-        "message" -> "",
+        "header" -> Json.obj(
+          "sequenceNumber" -> req.header.sequenceNumber,
+          "statusCode" -> "OK",
+          "message" -> ""
+        ),
         "itemList" -> JsArray(
           recs.toSeq.map { r =>
             val key = r._1.split(":")

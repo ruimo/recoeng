@@ -20,7 +20,7 @@ import com.ruimo.recoeng.json.JsonRequestHeader
 object ItemItem extends Controller with HasLogger with JsonRequestHandler {
   implicit val onSalesReads: Reads[OnSalesJsonRequest] = (
     (JsPath \ "header").read[JsonRequestHeader] and
-    (JsPath \ "mode").read(regex("\\w{4}".r)) and
+    (JsPath \ "transactionMode").read(regex("\\w{4}".r)) and
     (JsPath \ "dateTime").read(jodaDateReads("YYYYMMddHHmmss")) and
     (JsPath \ "userCode").read(regex("\\w{1,8}".r)) and
     (JsPath \ "itemList").read[Seq[SalesItem]]
@@ -57,13 +57,27 @@ object ItemItem extends Controller with HasLogger with JsonRequestHandler {
     res.map { r =>
       if (r.exists(_.isFailure)) {
         val result = InternalServerError(
-          Json.obj("sequenceNumber" -> req.header.sequenceNumber, "statusCode" -> "SYS", "message" -> r.toString)
+          Json.obj(
+            "header" -> Json.obj(
+              "sequenceNumber" -> req.header.sequenceNumber,
+              "statusCode" -> "SYS",
+              "message" -> r.toString
+            )
+          )
         )
         logger.error("Json onSales response: " + result)
         result
       }
       else {
-        val result = Ok(Json.obj("sequenceNumber" -> req.header.sequenceNumber, "statusCode" -> "OK", "message" -> ""))
+        val result = Ok(
+          Json.obj(
+            "header" -> Json.obj(
+              "sequenceNumber" -> req.header.sequenceNumber,
+              "statusCode" -> "OK",
+              "message" -> ""
+            )
+          )
+        )
         logger.info("Json onSales response: " + result)
         result
       }
