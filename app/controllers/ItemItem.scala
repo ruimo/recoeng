@@ -43,7 +43,7 @@ object ItemItem extends Controller with HasLogger with JsonRequestHandler {
     val keySet = req.itemList.map(_.redisCode).toSet
     val tranDate = req.tranDateInYyyyMmDd
     val res: Future[IndexedSeq[Try[Any]]] = Redis.pipelined(Redis.SalesDb) { pipe =>
-      keySet.foreach { key => pipe.zAdd("itemSoldDates", (key + ":" + tranDate, tranDate)) }
+      keySet.foreach { key => pipe.zAdd("itemSoldDates", (key + ":" + tranDate, tranDate.toDouble)) }
       for (key1 <- keySet; key2 <- keySet if key1 != key2) {
         pipe.hIncrBy("itemItem:" + key1 + ":" + tranDate)(key2, 1)
         pipe.zIncrBy("itemItemSum1m:" + key1, key2, 1)

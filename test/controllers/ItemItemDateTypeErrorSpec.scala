@@ -18,20 +18,19 @@ import org.specs2.runner._
 import org.junit.runner._
 
 @RunWith(classOf[JUnitRunner])
-class ItemItemDateErrorSpec extends Specification {
+class ItemItemDateTypeErrorSpec extends Specification {
   "item item controller" should {
     val appWithMemoryDatabase = FakeApplication(additionalConfiguration = inMemoryDatabase("default"))
-
-    "Should return error if date is invalid" in new WithServer(appWithMemoryDatabase, port = 3333) {
+    "Should return error if date type is invalid" in new WithServer(appWithMemoryDatabase, port = 3333) {
       val request = Json.parse(
         """
 {
   "header": {
-    "dateTime": "20141321234411",
-    "sequenceNumber": "0001"
+    "dateTime": 20141321,
+    "sequenceNumber": "00001"
   },
   "transactionMode": "0001",
-  "dateTime": "20140432234411",
+  "dateTime": 20140430,
   "userCode": "1",
   "itemList": [
     {

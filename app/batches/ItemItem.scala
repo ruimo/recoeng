@@ -16,7 +16,7 @@ import scala.concurrent.Future
 
 object ItemItem {
   def houseKeepItemItem(itemItemHoldingDurationMillis: Long): Unit =
-    houseKeepItemItem(toYyyyMmDd(System.currentTimeMillis - itemItemHoldingDurationMillis))
+    houseKeepItemItem(toYyyyMmDd(System.currentTimeMillis - itemItemHoldingDurationMillis).toInt)
 
   def houseKeepItemItem(expirationYyyyMmDd: Int) {
     val dates: LinkedHashSet[(String, Double)] = sync {
