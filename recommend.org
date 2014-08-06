@@ -71,24 +71,24 @@
   },
   "storeCode": "4",
   "itemCode": "20481",
-  "sort": "desc(cost)",
+  "sort": "desc(score)",
   "paging": {
     "offset": 0,
     "limit": 10
   }
 }    
 
-|------------------+-----+----------------+--------------------------------------------------------------------|
-| header           |     |                |                                                                    |
-| 　dateTime       | C14 | YYYYMMDDhhmmss | リクエスト日時                                                     |
-| 　sequenceNumber | C16 | [0-9]          | リクエストごとに一意な値                                           |
-| storeCode        | C8  | [A-Za-z0-9_]   |                                                                    |
-| itemCode         | C24 | [A-Za-z0-9_]   |                                                                    |
-| sort             | C64 | [A-Za-z0-9_()] | "asc(cost)"コストの昇順、"desc(cost)コストの降順                   |
-| paging           |     |                |                                                                    |
-| 　offset         | Num | 0-999999       |                                                                    |
-| 　limit          | Num | 1-999          |                                                                    |
-|------------------+-----+----------------+--------------------------------------------------------------------|
+|------------------+-----+----------------+----------------------------------------------------|
+| header           |     |                |                                                    |
+| 　dateTime       | C14 | YYYYMMDDhhmmss | リクエスト日時                                     |
+| 　sequenceNumber | C16 | [0-9]          | リクエストごとに一意な値                           |
+| storeCode        | C8  | [A-Za-z0-9_]   |                                                    |
+| itemCode         | C24 | [A-Za-z0-9_]   |                                                    |
+| sort             | C64 | [A-Za-z0-9_()] | "asc(score)"スコアの昇順、"desc(score)スコアの降順 |
+| paging           |     |                |                                                    |
+| 　offset         | Num | 0-999999       |                                                    |
+| 　limit          | Num | 1-999          |                                                    |
+|------------------+-----+----------------+----------------------------------------------------|
 
 ** レスポンス
 
@@ -102,15 +102,15 @@
     {
       "storeCode": "4",
       "itemCode": "20481",
-      "cost": 12
+      "score": 12
     },
     {
       "storeCode": "2",
       "itemCode": "2044454",
-      "cost": 4
+      "score": 4
     }
   ],
-  "sort": "desc(cost)",
+  "sort": "desc(score)",
   "paging": {
     "offset": 0,
     "limit": 10

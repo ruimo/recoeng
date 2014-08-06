@@ -22,7 +22,10 @@ object RecommendByItem extends Controller with HasLogger with JsonRequestHandler
   def bySingleItem = Action.async(BodyParsers.parse.json) { request =>
     request.body.validate[RecommendBySingleItemJsonRequest].fold(
       errors => {
-        logger.error("Json RecommendByItem.bySingleItem validation error: " + errors)
+        logger.error(
+          "Json RecommendByItem.bySingleItem validation error: " + errors +
+          ", request = " + request.body
+        )
         Future {BadRequest(toJson(errors))}
       },
       req => {

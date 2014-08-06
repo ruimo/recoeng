@@ -21,7 +21,7 @@ object ItemItem extends Controller with HasLogger with JsonRequestHandler {
   implicit val onSalesReads: Reads[OnSalesJsonRequest] = (
     (JsPath \ "header").read[JsonRequestHeader] and
     (JsPath \ "transactionMode").read(regex("\\w{4}".r)) and
-    (JsPath \ "dateTime").read(jodaDateReads("YYYYMMddHHmmss")) and
+    (JsPath \ "dateTime").read(jodaDateReads("YYYYMMddHHmmss") keepAnd regex("\\d{14}".r)) and
     (JsPath \ "userCode").read(regex("\\w{1,8}".r)) and
     (JsPath \ "itemList").read[Seq[SalesItem]]
   )(OnSalesJsonRequest.apply _)
@@ -29,7 +29,10 @@ object ItemItem extends Controller with HasLogger with JsonRequestHandler {
   def onSales = Action.async(BodyParsers.parse.json) { request =>
     request.body.validate[OnSalesJsonRequest].fold(
       errors => {
-        logger.error("Json ItemItem.onSales request validation error: " + errors)
+        logger.error(
+          "Json ItemItem.onSales request validation error: " + errors +
+          ", request = " + request.body
+        )
         Future {BadRequest(toJson(errors))}
       },
       req => {

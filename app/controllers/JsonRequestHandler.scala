@@ -23,7 +23,7 @@ import com.ruimo.recoeng.json.Desc
 
 trait JsonRequestHandler extends Controller with HasLogger {
   implicit val jsonRequestHeaderReads: Reads[JsonRequestHeader] = (
-    (JsPath \ "dateTime").read(jodaDateReads("YYYYMMddHHmmss")) and
+    (JsPath \ "dateTime").read(jodaDateReads("YYYYMMddHHmmss") keepAnd regex("\\d{14}".r)) and
     (JsPath \ "sequenceNumber").read(regex("\\d{1,16}".r))
   )(JsonRequestHeader.apply _)
 
@@ -53,7 +53,7 @@ trait JsonRequestHandler extends Controller with HasLogger {
     (JsPath \ "header").read[JsonRequestHeader] and
     (JsPath \ "storeCode").read(regex("\\w{1,8}".r)) and
     (JsPath \ "itemCode").read(regex("\\w{1,24}".r)) and
-    (JsPath \ "sort").read(regex("""(?i)(?:asc|desc)\(cost\)""".r)) and
+    (JsPath \ "sort").read(regex("""(?i)(?:asc|desc)\(score\)""".r)) and
     (JsPath \ "paging").read[JsonRequestPaging]
   )(RecommendBySingleItemJsonRequest.apply _)
 
