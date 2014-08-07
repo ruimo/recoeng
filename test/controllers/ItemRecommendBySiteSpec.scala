@@ -49,7 +49,7 @@ class ItemRecommendBySiteSpec extends Specification {
   },
   "storeCode": "0001",
   "itemCode": "5817",
-  "itemList": [
+  "salesItems": [
     {
       "storeCode": "0001",
       "itemCode": "4810",
@@ -89,7 +89,7 @@ class ItemRecommendBySiteSpec extends Specification {
       }
 
       doWith(Await.result(
-        WS.url("http://localhost:3333" + controllers.routes.ItemRecommendBySite.bySingleItem())
+        WS.url("http://localhost:3333" + controllers.routes.ItemRecommendBySite.byItem())
           .withHeaders("Content-Type" -> "application/json; charset=utf-8")
           .post(Json.parse("""
 {
@@ -97,9 +97,14 @@ class ItemRecommendBySiteSpec extends Specification {
     "dateTime": "20140421234411",
     "sequenceNumber": "3194720"
   },
-  "storeCode": "0001",
-  "itemCode": "5817",
-  "sort": "desc(cost)",
+  "salesItems": [
+    {
+      "storeCode": "0001",
+      "itemCode": "5817",
+      "quantity": 2
+    }
+  ],
+  "sort": "desc(score)",
   "paging": {
     "offset": 0,
     "limit": 10
@@ -115,10 +120,10 @@ class ItemRecommendBySiteSpec extends Specification {
           header \ "statusCode" === JsString("OK")
         }
 
-        doWith((jsonResp \ "itemList").asInstanceOf[JsArray]) { itemList =>
-          itemList.value.size === 2
+        doWith((jsonResp \ "salesItems").asInstanceOf[JsArray]) { salesItems =>
+          salesItems.value.size === 2
           doWith(
-            itemList.value.map { o =>
+            salesItems.value.map { o =>
               (
                 (o \ "storeCode").asInstanceOf[JsString].value +
                 ":" +
@@ -145,7 +150,7 @@ class ItemRecommendBySiteSpec extends Specification {
   },
   "storeCode": "0003",
   "itemCode": "1834",
-  "itemList": [
+  "salesItems": [
     {
       "storeCode": "0001",
       "itemCode": "4810",
@@ -218,10 +223,10 @@ class ItemRecommendBySiteSpec extends Specification {
           header \ "statusCode" === JsString("OK")
         }
 
-        doWith((jsonResp \ "itemList").asInstanceOf[JsArray]) { itemList =>
-          itemList.value.size === 2
+        doWith((jsonResp \ "salesItems").asInstanceOf[JsArray]) { salesItems =>
+          salesItems.value.size === 2
           doWith(
-            itemList.value.map { o =>
+            salesItems.value.map { o =>
               (o \ "storeCode").asInstanceOf[JsString].value +
               ":" +
               (o \ "itemCode").asInstanceOf[JsString].value

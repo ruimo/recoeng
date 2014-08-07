@@ -13,7 +13,7 @@ import helpers.ErrorEntry
 import helpers.Redis
 import scala.concurrent.Future
 import scala.util.Try
-import com.ruimo.recoeng.json.RecommendBySingleItemJsonRequest
+import com.ruimo.recoeng.json.RecommendByItemJsonRequest
 import com.ruimo.recoeng.json.Asc
 import com.ruimo.recoeng.json.CreateItemRecommendBySite
 import com.ruimo.recoeng.json.ListItemRecommendBySite
@@ -27,7 +27,7 @@ object ItemRecommendBySite extends Controller with HasLogger with JsonRequestHan
     (JsPath \ "header").read[JsonRequestHeader] and
     (JsPath \ "storeCode").read(regex("\\w{1,8}".r)) and
     (JsPath \ "itemCode").read(regex("\\w{1,24}".r)) and
-    (JsPath \ "itemList").read[Seq[ScoredItem]]
+    (JsPath \ "salesItems").read[Seq[ScoredItem]]
   )(CreateItemRecommendBySite.apply _)
 
   implicit val listItemRecommendBySiteReads: Reads[ListItemRecommendBySite] = (
@@ -65,7 +65,7 @@ object ItemRecommendBySite extends Controller with HasLogger with JsonRequestHan
     val key = req.storeCode + ":" + req.itemCode
     Redis.pipelined(Redis.SalesDb) { pipe =>
       pipe.zAddFromMap(
-        "itemItemSite:" + key, req.itemListAsMap.asInstanceOf[Map[Any, Double]]
+        "itemItemSite:" + key, req.salesItemsAsMap.asInstanceOf[Map[Any, Double]]
       )
       pipe.sAdd("itemSite", key)
     }
@@ -99,7 +99,7 @@ object ItemRecommendBySite extends Controller with HasLogger with JsonRequestHan
             "statusCode" -> "OK",
             "message" -> ""
           ),
-          "itemList" -> JsArray(
+          "salesItems" -> JsArray(
             rec.toSeq.map { e =>
               val key = e.split(":")
               Json.obj(
@@ -117,22 +117,22 @@ object ItemRecommendBySite extends Controller with HasLogger with JsonRequestHan
     }
   }
 
-  def bySingleItem = Action.async(BodyParsers.parse.json) { request =>
-    request.body.validate[RecommendBySingleItemJsonRequest].fold(
+  def byItem = Action.async(BodyParsers.parse.json) { request =>
+    request.body.validate[RecommendByItemJsonRequest].fold(
       errors => {
-        logger.error("Json ItemRecommendBySite.bySingleItem validation error: " + errors)
+        logger.error("Json ItemRecommendBySite.byItem validation error: " + errors)
         Future {BadRequest(toJson(errors))}
       },
       req => {
-        logger.info("Json ItemRecommendBySite.bySingleItem request: " + req)
+        logger.info("Json ItemRecommendBySite.byItem request: " + req)
         req.sortOrder match {
-          case Asc(col) => handleBySingleItem(req)
-          case Desc(col) => handleBySingleItem(req)
+          case Asc(col) => handleByItem(req)
+          case Desc(col) => handleByItem(req)
         }
       }
     )
   }
 
-  def handleBySingleItem(req: RecommendBySingleItemJsonRequest): Future[Result] =
+  def handleByItem(req: RecommendByItemJsonRequest): Future[Result] =
     queryItemSum(req, "itemItemSite")
 }

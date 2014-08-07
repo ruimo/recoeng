@@ -33,7 +33,7 @@ class ItemItemOnSalesSpec extends Specification {
       doWith(Redis.sync { _.zRangeWithScores[String]("itemSoldDates", end = -1) }) { _.size === 0 }
 
       doWith(Await.result(
-        WS.url("http://localhost:3333" + controllers.routes.RecommendByItem.bySingleItem())
+        WS.url("http://localhost:3333" + controllers.routes.RecommendByItem.byItem())
           .withHeaders("Content-Type" -> "application/json; charset=utf-8")
           .post(Json.parse("""
 {
@@ -41,9 +41,14 @@ class ItemItemOnSalesSpec extends Specification {
     "dateTime": "20140421234411",
     "sequenceNumber": "3194710"
   },
-  "storeCode": "4",
-  "itemCode": "20481",
-  "sort": "desc(cost)",
+  "salesItems": [
+    {
+      "storeCode": "4",
+      "itemCode": "20481",
+      "quantity": 2
+    }
+  ],
+  "sort": "desc(score)",
   "paging": {
     "offset": 0,
     "limit": 10
@@ -58,7 +63,7 @@ class ItemItemOnSalesSpec extends Specification {
           header \ "sequenceNumber" === JsString("3194710")
           header \ "statusCode" === JsString("OK")
         }
-        (jsonResp \ "itemList").asInstanceOf[JsArray].value.size === 0
+        (jsonResp \ "salesItems").asInstanceOf[JsArray].value.size === 0
       }        
 
       doWith(Await.result(
@@ -73,7 +78,7 @@ class ItemItemOnSalesSpec extends Specification {
   "transactionMode": "0001",
   "dateTime": "20141002112233",
   "userCode": "1",
-  "itemList": [
+  "salesItems": [
     {
       "storeCode": "0001",
       "itemCode": "1491",
@@ -163,7 +168,7 @@ class ItemItemOnSalesSpec extends Specification {
       }
 
       doWith(Await.result(
-        WS.url("http://localhost:3333" + controllers.routes.RecommendByItem.bySingleItem())
+        WS.url("http://localhost:3333" + controllers.routes.RecommendByItem.byItem())
           .withHeaders("Content-Type" -> "application/json; charset=utf-8")
           .post(Json.parse("""
 {
@@ -171,9 +176,14 @@ class ItemItemOnSalesSpec extends Specification {
     "dateTime": "20140421234411",
     "sequenceNumber": "3194711"
   },
-  "storeCode": "0001",
-  "itemCode": "1491",
-  "sort": "desc(cost)",
+  "salesItems": [
+    {
+      "storeCode": "0001",
+      "itemCode": "1491",
+      "quantity": 2
+    }
+  ],
+  "sort": "desc(score)",
   "paging": {
     "offset": 0,
     "limit": 10
@@ -188,10 +198,10 @@ class ItemItemOnSalesSpec extends Specification {
           header \ "sequenceNumber" === JsString("3194711")
           header \ "statusCode" === JsString("OK")
         }
-        doWith((jsonResp \ "itemList").asInstanceOf[JsArray]) { itemList =>
-          itemList.value.size === 2
+        doWith((jsonResp \ "salesItems").asInstanceOf[JsArray]) { salesItems =>
+          salesItems.value.size === 2
           doWith(
-            itemList.value.map { o =>
+            salesItems.value.map { o =>
               (
                 (o \ "storeCode").asInstanceOf[JsString].value +
                 ":" +
@@ -218,7 +228,7 @@ class ItemItemOnSalesSpec extends Specification {
   "transactionMode": "0001",
   "dateTime": "20141002223344",
   "userCode": "1",
-  "itemList": [
+  "salesItems": [
     {
       "storeCode": "0001",
       "itemCode": "1491",
@@ -341,7 +351,7 @@ class ItemItemOnSalesSpec extends Specification {
   "transactionMode": "0001",
   "dateTime": "20141010111111",
   "userCode": "1",
-  "itemList": [
+  "salesItems": [
     {
       "storeCode": "0001",
       "itemCode": "1491",
@@ -466,7 +476,7 @@ class ItemItemOnSalesSpec extends Specification {
       }
 
       doWith(Await.result(
-        WS.url("http://localhost:3333" + controllers.routes.RecommendByItem.bySingleItem())
+        WS.url("http://localhost:3333" + controllers.routes.RecommendByItem.byItem())
           .withHeaders("Content-Type" -> "application/json; charset=utf-8")
           .post(Json.parse("""
 {
@@ -474,9 +484,14 @@ class ItemItemOnSalesSpec extends Specification {
     "dateTime": "20140421234411",
     "sequenceNumber": "3194712"
   },
-  "storeCode": "0001",
-  "itemCode": "1491",
-  "sort": "desc(cost)",
+  "salesItems": [
+    {
+      "storeCode": "0001",
+      "itemCode": "1491",
+      "quantity": 1
+    }
+  ],
+  "sort": "desc(score)",
   "paging": {
     "offset": 0,
     "limit": 2
@@ -491,10 +506,10 @@ class ItemItemOnSalesSpec extends Specification {
           header \ "sequenceNumber" === JsString("3194712")
           header \ "statusCode" === JsString("OK")
         }
-        doWith((jsonResp \ "itemList").asInstanceOf[JsArray]) { itemList =>
-          itemList.value.size === 2
+        doWith((jsonResp \ "salesItems").asInstanceOf[JsArray]) { salesItems =>
+          salesItems.value.size === 2
           doWith(
-            itemList.value.map { o =>
+            salesItems.value.map { o =>
               (
                 (o \ "storeCode").asInstanceOf[JsString].value +
                 ":" +
@@ -510,7 +525,7 @@ class ItemItemOnSalesSpec extends Specification {
       }        
 
       doWith(Await.result(
-        WS.url("http://localhost:3333" + controllers.routes.RecommendByItem.bySingleItem())
+        WS.url("http://localhost:3333" + controllers.routes.RecommendByItem.byItem())
           .withHeaders("Content-Type" -> "application/json; charset=utf-8")
           .post(Json.parse("""
 {
@@ -518,9 +533,14 @@ class ItemItemOnSalesSpec extends Specification {
     "dateTime": "20140421234411",
     "sequenceNumber": "3194712"
   },
-  "storeCode": "0001",
-  "itemCode": "1491",
-  "sort": "desc(cost)",
+  "salesItems": [
+    {
+      "storeCode": "0001",
+      "itemCode": "1491",
+      "quantity": 1
+    }
+  ],
+  "sort": "desc(score)",
   "paging": {
     "offset": 2,
     "limit": 10
@@ -535,10 +555,10 @@ class ItemItemOnSalesSpec extends Specification {
           header \ "sequenceNumber" === JsString("3194712")
           header \ "statusCode" === JsString("OK")
         }
-        doWith((jsonResp \ "itemList").asInstanceOf[JsArray]) { itemList =>
-          itemList.value.size === 1
+        doWith((jsonResp \ "salesItems").asInstanceOf[JsArray]) { salesItems =>
+          salesItems.value.size === 1
           doWith(
-            itemList.value.map { o =>
+            salesItems.value.map { o =>
               (
                 (o \ "storeCode").asInstanceOf[JsString].value +
                 ":" +

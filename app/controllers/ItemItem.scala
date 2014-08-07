@@ -23,7 +23,7 @@ object ItemItem extends Controller with HasLogger with JsonRequestHandler {
     (JsPath \ "transactionMode").read(regex("\\w{4}".r)) and
     (JsPath \ "dateTime").read(jodaDateReads("YYYYMMddHHmmss") keepAnd regex("\\d{14}".r)) and
     (JsPath \ "userCode").read(regex("\\w{1,8}".r)) and
-    (JsPath \ "itemList").read[Seq[SalesItem]]
+    (JsPath \ "salesItems").read[Seq[SalesItem]]
   )(OnSalesJsonRequest.apply _)
 
   def onSales = Action.async(BodyParsers.parse.json) { request =>
@@ -43,7 +43,7 @@ object ItemItem extends Controller with HasLogger with JsonRequestHandler {
   }
 
   def handleOnSales(req: OnSalesJsonRequest): Future[Result] = {
-    val keySet = req.itemList.map(_.redisCode).toSet
+    val keySet = req.salesItems.map(_.redisCode).toSet
     val tranDate = req.tranDateInYyyyMmDd
     val res: Future[IndexedSeq[Try[Any]]] = Redis.pipelined(Redis.SalesDb) { pipe =>
       keySet.foreach { key => pipe.zAdd("itemSoldDates", (key + ":" + tranDate, tranDate.toDouble)) }

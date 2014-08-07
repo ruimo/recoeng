@@ -35,7 +35,7 @@ class ItemItemSequenceErrorSpec extends Specification {
   "mode": "0",
   "dateTime": "20140421234411",
   "userCode": "1",
-  "itemList": [
+  "salesItems": [
     {
       "storeCode": "4",
       "itemCode": "20481",

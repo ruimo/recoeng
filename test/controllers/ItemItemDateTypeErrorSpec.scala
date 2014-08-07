@@ -32,7 +32,7 @@ class ItemItemDateTypeErrorSpec extends Specification {
   "transactionMode": "0001",
   "dateTime": 20140430,
   "userCode": "1",
-  "itemList": [
+  "salesItems": [
     {
       "storeCode": "4",
       "itemCode": "20481",

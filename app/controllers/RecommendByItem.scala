@@ -14,30 +14,30 @@ import scala.concurrent.Future
 import scala.util.Try
 import scredis.util.LinkedHashSet
 import scredis.Score
-import com.ruimo.recoeng.json.RecommendBySingleItemJsonRequest
+import com.ruimo.recoeng.json.RecommendByItemJsonRequest
 import com.ruimo.recoeng.json.Asc
 import com.ruimo.recoeng.json.Desc
 
 object RecommendByItem extends Controller with HasLogger with JsonRequestHandler {
-  def bySingleItem = Action.async(BodyParsers.parse.json) { request =>
-    request.body.validate[RecommendBySingleItemJsonRequest].fold(
+  def byItem = Action.async(BodyParsers.parse.json) { request =>
+    request.body.validate[RecommendByItemJsonRequest].fold(
       errors => {
         logger.error(
-          "Json RecommendByItem.bySingleItem validation error: " + errors +
+          "Json RecommendByItem.byItem validation error: " + errors +
           ", request = " + request.body
         )
         Future {BadRequest(toJson(errors))}
       },
       req => {
-        logger.info("Json RecommendByItem.bySingleItem request: " + req)
+        logger.info("Json RecommendByItem.byItem request: " + req)
         req.sortOrder match {
-          case Asc(col) => handleBySingleItem(req)
-          case Desc(col) => handleBySingleItem(req)
+          case Asc(col) => handleByItem(req)
+          case Desc(col) => handleByItem(req)
         }
       }
     )
   }
 
-  def handleBySingleItem(req: RecommendBySingleItemJsonRequest): Future[Result] =
+  def handleByItem(req: RecommendByItemJsonRequest): Future[Result] =
     queryItemSum(req, "itemItemSum1m")
 }

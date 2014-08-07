@@ -4,10 +4,10 @@
 
 # Home page
 POST    /onSales                    controllers.ItemItem.onSales
-POST    /recommendBySingleItem      controllers.RecommendByItem.bySingleItem
+POST    /recommendByItem            controllers.RecommendByItem.byItem
 POST    /createItemRecommendBySite  controllers.ItemRecommendBySite.create
 POST    /listItemRecommendBySite    controllers.ItemRecommendBySite.list
-POST    /recommendBySiteSingleItem  controllers.ItemRecommendBySite.bySingleItem
+POST    /recommendBySiteItem        controllers.ItemRecommendBySite.byItem
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

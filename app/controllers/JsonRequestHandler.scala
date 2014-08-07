@@ -1,5 +1,6 @@
 package controllers
 
+import scredis.util.LinkedHashSet
 import play.api.data.validation.ValidationError
 import play.api.libs.json._
 import play.api.libs.json.Reads._
@@ -16,7 +17,7 @@ import com.ruimo.recoeng.json.JsonRequestHeader
 import com.ruimo.recoeng.json.JsonRequestPaging
 import com.ruimo.recoeng.json.JsonRequestCursorPaging
 import com.ruimo.recoeng.json.SalesItem
-import com.ruimo.recoeng.json.RecommendBySingleItemJsonRequest
+import com.ruimo.recoeng.json.RecommendByItemJsonRequest
 import com.ruimo.recoeng.json.ScoredItem
 import com.ruimo.recoeng.json.Asc
 import com.ruimo.recoeng.json.Desc
@@ -49,30 +50,42 @@ trait JsonRequestHandler extends Controller with HasLogger {
     (JsPath \ "score").read[Double]
   )(ScoredItem.apply _)
 
-  implicit val recommendBySingleItem: Reads[RecommendBySingleItemJsonRequest] = (
+  implicit val recommendByItem: Reads[RecommendByItemJsonRequest] = (
     (JsPath \ "header").read[JsonRequestHeader] and
-    (JsPath \ "storeCode").read(regex("\\w{1,8}".r)) and
-    (JsPath \ "itemCode").read(regex("\\w{1,24}".r)) and
+    (JsPath \ "salesItems").read[Seq[SalesItem]] and
     (JsPath \ "sort").read(regex("""(?i)(?:asc|desc)\(score\)""".r)) and
     (JsPath \ "paging").read[JsonRequestPaging]
-  )(RecommendBySingleItemJsonRequest.apply _)
+  )(RecommendByItemJsonRequest.apply _)
 
   def toJson(errors: Seq[(JsPath, Seq[ValidationError])]): JsValue =
     Json.toJson(errors.map {e => ErrorEntry(e._1, e._2)})
 
-  def queryItemSum(req: RecommendBySingleItemJsonRequest, keyBase: String): Future[Result] = {
-    val key = keyBase + ":" + req.storeCode + ":" + req.itemCode
-    Redis.pipelined1(Redis.SalesDb) { pipe =>
-      req.sortOrder match {
-        case Asc(col) =>
-          pipe.zRangeByScoreWithScores(
-            key, Score.Infinity, Score.Infinity, Some(req.paging.offset, req.paging.limit)
-          )
-        case Desc(col) =>
-          pipe.zRevRangeByScoreWithScores(
-            key, Score.Infinity, Score.Infinity, Some(req.paging.offset, req.paging.limit)
-          )
+  implicit val scoredItemOrder: Ordering[ScoredItem] = Ordering.by[ScoredItem, Double](_.score)
+
+  def queryItemSum(req: RecommendByItemJsonRequest, keyBase: String): Future[Result] = {
+    def queryRedis(storeCode: String, itemCode: String): Future[LinkedHashSet[(String, Double)]] = {
+      val key = keyBase + ":" + storeCode + ":" + itemCode
+        
+      Redis.pipelined1(Redis.SalesDb) { pipe =>
+        req.sortOrder match {
+          case Asc(col) =>
+            pipe.zRangeByScoreWithScores(
+              key, Score.Infinity, Score.Infinity, Some(req.paging.offset, req.paging.limit)
+            )
+          case Desc(col) =>
+            pipe.zRevRangeByScoreWithScores(
+              key, Score.Infinity, Score.Infinity, Some(req.paging.offset, req.paging.limit)
+            )
+        }
       }
+    }
+    
+    Future.fold {
+      req.salesItems.map {
+        it => queryRedis(it.storeCode, it.itemCode)
+      }
+    }(LinkedHashSet[(String, Double)]()) {
+      (sum, e) => (sum ++ e).take(req.paging.limit)
     }.map { recs =>
       val result = Ok(Json.obj(
         "header" -> Json.obj(
@@ -80,7 +93,7 @@ trait JsonRequestHandler extends Controller with HasLogger {
           "statusCode" -> "OK",
           "message" -> ""
         ),
-        "itemList" -> JsArray(
+        "salesItems" -> JsArray(
           recs.toSeq.map { r =>
             val key = r._1.split(":")
             Json.obj(
@@ -96,7 +109,7 @@ trait JsonRequestHandler extends Controller with HasLogger {
           "limit" -> req.paging.limit
         )
       ))
-      logger.info("Json RecommendByItem.bySingleItem response: " + result)
+      logger.info("Json RecommendByItem.byItem response: " + result)
       result
     }
   }

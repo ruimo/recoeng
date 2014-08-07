@@ -14,7 +14,7 @@
   "transactionMode": "0",
   "dateTime": "20140421234411",
   "userCode": "1",
-  "itemList": [
+  "salesItems": [
     {
       "storeCode": "4",
       "itemCode": "20481",
@@ -35,7 +35,7 @@
 | transactionMode  | C4  | 0001: Sales    |                          |
 | dateTime         | C14 | YYYYMMDDhhmmss | 取引日時                 |
 | userCode         | C8  | [A-Za-z0-9_]   |                          |
-| itemList         |     |                |                          |
+| salesItems       |     |                |                          |
 | 　storeCode      | C8  | [A-Za-z0-9_]   |                          |
 | 　itemCode       | C24 | [A-Za-z0-9_]   |                          |
 | 　quantity       | Num | 0-999999       |                          |
@@ -58,7 +58,7 @@
 | message        | C*  |              | 任意メッセージ             |
 |----------------+-----+--------------+----------------------------|
 
-* 単品レコメンド取得
+* レコメンド取得
 
 特定の商品に対するレコメンドを取得する
 
@@ -69,8 +69,13 @@
     "dateTime": "20140421234411",
     "sequenceNumber": "3194710"
   },
-  "storeCode": "4",
-  "itemCode": "20481",
+  "salesItems": [
+    {
+      "storeCode": "4",
+      "itemCode": "20481",
+      "quantity": 3
+    }
+  ],
   "sort": "desc(score)",
   "paging": {
     "offset": 0,
@@ -78,17 +83,19 @@
   }
 }    
 
-|------------------+-----+----------------+----------------------------------------------------|
-| header           |     |                |                                                    |
-| 　dateTime       | C14 | YYYYMMDDhhmmss | リクエスト日時                                     |
-| 　sequenceNumber | C16 | [0-9]          | リクエストごとに一意な値                           |
-| storeCode        | C8  | [A-Za-z0-9_]   |                                                    |
-| itemCode         | C24 | [A-Za-z0-9_]   |                                                    |
-| sort             | C64 | [A-Za-z0-9_()] | "asc(score)"スコアの昇順、"desc(score)スコアの降順 |
-| paging           |     |                |                                                    |
-| 　offset         | Num | 0-999999       |                                                    |
-| 　limit          | Num | 1-999          |                                                    |
-|------------------+-----+----------------+----------------------------------------------------|
+|------------------+-----+----------------+-----------------------------------------------------|
+| header           |     |                |                                                     |
+| 　dateTime       | C14 | YYYYMMDDhhmmss | リクエスト日時                                      |
+| 　sequenceNumber | C16 | [0-9]          | リクエストごとに一意な値                            |
+| salesItems       |     |                | この商品購入時のレコメンドを調べる                  |
+| 　storeCode      | C8  | [A-Za-z0-9_]   |                                                     |
+| 　itemCode       | C24 | [A-Za-z0-9_]   |                                                     |
+| 　quantity       | Num | 0-999999       |                                                     |
+| sort             | C64 | [A-Za-z0-9_()] | "asc(score)"スコアの昇順、"desc(score)"スコアの降順 |
+| paging           |     |                |                                                     |
+| 　offset         | Num | 0-999999       |                                                     |
+| 　limit          | Num | 1-999          |                                                     |
+|------------------+-----+----------------+-----------------------------------------------------|
 
 ** レスポンス
 
@@ -98,7 +105,7 @@
     "statusCode": "OK",
     "message": ""
   },
-  "itemList": [
+  "salesItems": [
     {
       "storeCode": "4",
       "itemCode": "20481",
@@ -122,7 +129,7 @@
 | statusCode     | C8    | [0-9][A-Z]     | OK: 正常                                         |
 |                |       |                | SYS: システムエラー                              |
 | message        | C4096 |                | 任意メッセージ                                   |
-| itemList       | []    |                |                                                  |
+| salesItems     | []    |                | レコメンド商品                                   |
 | 　storeCode    | C8    | [A-Za-z0-9_]   |                                                  |
 | 　itemCode     | C24   | [A-Za-z0-9_]   |                                                  |
 | 　score        | Num   |                | スコア。一緒に購買された回数(個数は考慮されない) |
@@ -145,7 +152,7 @@
   },
   "storeCode": "4",
   "itemCode": "20481",
-  "itemList": [
+  "salesItems": [
     {
       "storeCode": "4",
       "itemCode": "20481",
@@ -165,7 +172,7 @@
 | 　sequenceNumber | C16 | [0-9]          | リクエストごとに一意な値 |
 | storeCode        | C8  | [A-Za-z0-9_]   | 購入店舗                 |
 | itemCode         | C24 | [A-Za-z0-9_]   | 購入商品                 |
-| itemList         |     |                |                          |
+| salesItems       |     |                |                          |
 | 　storeCode      | C8  | [A-Za-z0-9_]   | レコメンドする店舗       |
 | 　itemCode       | C24 | [A-Za-z0-9_]   | レコメンドする商品       |
 | 　score          | Num |                | スコア                   |
@@ -225,7 +232,7 @@
     "statusCode": "OK",
     "message": ""
   },
-  "itemList": [
+  "salesItems": [
     {
       "storeCode": "4",
       "itemCode": "20481",
@@ -246,7 +253,7 @@
 | statusCode     | C8    | [0-9][A-Z]     | OK: 正常                   |
 |                |       |                | SYS: システムエラー        |
 | message        | C4096 |                | 任意メッセージ             |
-| itemList       | []    |                |                            |
+| salesItems     | []    |                |                            |
 | 　storeCode    | C8    | [A-Za-z0-9_]   |                            |
 | 　itemCode     | C24   | [A-Za-z0-9_]   |                            |
 | cursorPaging   |       |                |                            |
