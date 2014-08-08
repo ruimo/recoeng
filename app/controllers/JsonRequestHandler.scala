@@ -80,12 +80,21 @@ trait JsonRequestHandler extends Controller with HasLogger {
       }
     }
     
+    val shouldExcluded = req.salesItems.map {
+      it => it.storeCode + ":" + it.itemCode
+    }.toSet
+
     Future.fold {
       req.salesItems.map {
         it => queryRedis(it.storeCode, it.itemCode)
       }
     }(LinkedHashSet[(String, Double)]()) {
-      (sum, e) => (sum ++ e).take(req.paging.limit)
+      (sum, h) => {
+        val removedThemselves = h.filter { e =>
+          ! shouldExcluded.contains(e._1)
+        }
+        (sum ++ removedThemselves).take(req.paging.limit)
+      }
     }.map { recs =>
       val result = Ok(Json.obj(
         "header" -> Json.obj(

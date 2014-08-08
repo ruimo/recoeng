@@ -1,5 +1,7 @@
 name := """recoeng"""
 
+organization := "com.ruimo"
+
 version := "1.0-SNAPSHOT"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
@@ -16,4 +18,11 @@ libraryDependencies ++= Seq(
   anorm,
   cache,
   ws
+)
+
+publishTo := Some(
+  Resolver.file(
+    "recoengcommon",
+    new File(Option(System.getenv("RELEASE_DIR")).getOrElse("/tmp"))
+  )
 )
