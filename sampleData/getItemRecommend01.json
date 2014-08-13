@@ -1,0 +1,18 @@
+{
+  "header": {
+    "dateTime": "20140421234411",
+    "sequenceNumber": "3194710"
+  },
+  "salesItems": [
+    {
+      "storeCode": "0142",
+      "itemCode": "1401571029",
+      "quantity": 3
+    }
+  ],
+  "sort": "desc(score)",
+  "paging": {
+    "offset": 0,
+    "limit": 10
+  }
+}    
