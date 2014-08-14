@@ -14,6 +14,10 @@
     </encoder>
   </appender>
   
+  <logger name="scredis.protocol" level="DEBUG">
+    <appender-ref ref="STDOUT" />
+  </logger>
+
   <logger name="com.jolbox.bonecp" level="DEBUG">
     <appender-ref ref="STDOUT" />
   </logger>

@@ -70,11 +70,11 @@ trait JsonRequestHandler extends Controller with HasLogger {
         req.sortOrder match {
           case Asc(col) =>
             pipe.zRangeByScoreWithScores(
-              key, Score.Infinity, Score.Infinity, Some(req.paging.offset, req.paging.limit)
+              key, Score.exclusive(0), Score.Infinity, Some(req.paging.offset, req.paging.limit)
             )
           case Desc(col) =>
             pipe.zRevRangeByScoreWithScores(
-              key, Score.Infinity, Score.Infinity, Some(req.paging.offset, req.paging.limit)
+              key, Score.Infinity, Score.exclusive(0), Some(req.paging.offset, req.paging.limit)
             )
         }
       }

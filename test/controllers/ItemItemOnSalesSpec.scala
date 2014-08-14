@@ -632,6 +632,55 @@ class ItemItemOnSalesSpec extends Specification {
         set.contains("0001:1491", 1) must beTrue
         set.contains("0001:5819", 0) must beTrue
       }
+
+      // Record with score=0 should not be recommended.
+      doWith(Await.result(
+        WS.url("http://localhost:3333" + controllers.routes.RecommendByItem.byItem())
+          .withHeaders("Content-Type" -> "application/json; charset=utf-8")
+          .post(Json.parse("""
+{
+  "header": {
+    "dateTime": "20140421234411",
+    "sequenceNumber": "3194713"
+  },
+  "salesItems": [
+    {
+      "storeCode": "0003",
+      "itemCode": "8172",
+      "quantity": 1
+    }
+  ],
+  "sort": "desc(score)",
+  "paging": {
+    "offset": 0,
+    "limit": 10
+  }
+}    
+            """)), Duration(10, SECONDS)
+      )) { response =>
+        response.status === 200
+        response.header("Content-Type").toString.indexOf("application/json") !== -1
+        val jsonResp = Json.parse(response.body)
+        doWith(jsonResp \ "header") { header =>
+          header \ "sequenceNumber" === JsString("3194713")
+          header \ "statusCode" === JsString("OK")
+        }
+        doWith((jsonResp \ "salesItems").asInstanceOf[JsArray]) { salesItems =>
+          salesItems.value.size === 1
+          doWith(
+            salesItems.value.map { o =>
+              (
+                (o \ "storeCode").asInstanceOf[JsString].value +
+                ":" +
+                (o \ "itemCode").asInstanceOf[JsString].value,
+                o \ "score"
+              )
+            }.toMap
+          ) { map =>
+            map("0001:1491") === JsNumber(1.0)
+          }
+        }
+      }        
     }
   }
 }

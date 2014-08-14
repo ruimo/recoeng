@@ -1,15 +1,21 @@
 {
   "header": {
-      "sequenceNumber": "12345"
+    "dateTime": "20140421234411",
+    "sequenceNumber": "12345"
   },
-  "mode": "0",
-  "dateTime": "2014-02-03 23:10:03",
+  "transactionMode": "0001",
+  "dateTime": "20140203231003",
   "userCode": "1",
-  "itemList": [
+  "salesItems": [
     {
       "storeCode": "0142",
       "itemCode": "1401571029",
       "quantity": 3
+    },
+    {
+      "storeCode": "0142",
+      "itemCode": "1401571030",
+      "quantity": 1
     }
   ]
 }
