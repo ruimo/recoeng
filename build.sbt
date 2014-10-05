@@ -8,7 +8,7 @@ lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
 scalaVersion := "2.11.2"
 
-resolvers += "ruimo.com" at "http://www.ruimo.com/release"
+resolvers += "ruimo.com" at "http://static.ruimo.com/release"
 
 libraryDependencies ++= Seq(
   "com.livestream" %% "scredis" % "1.1.2",
